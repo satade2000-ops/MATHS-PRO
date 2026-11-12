@@ -35,6 +35,9 @@ interface MathContextType {
   isPlayStoreOpen: boolean;
   openPlayStore: () => void;
   closePlayStore: () => void;
+  isPrivacyOpen: boolean;
+  openPrivacy: () => void;
+  closePrivacy: () => void;
   openAdModal: () => void;
   closeAdModal: () => void;
   doubleLastGameXp: () => void;
@@ -114,6 +117,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isPremiumOpen, setIsPremiumOpen] = useState(false);
   const [isAdOpen, setIsAdOpen] = useState(false);
   const [isPlayStoreOpen, setIsPlayStoreOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   // Sync dark class on document element
   useEffect(() => {
@@ -123,6 +127,24 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
       document.documentElement.classList.remove('dark');
     }
   }, [settings.darkMode]);
+
+  // Sync document language
+  useEffect(() => {
+    document.documentElement.lang = settings.language;
+  }, [settings.language]);
+
+  // Enforce AdSense suppression during VIP mode or active gameplay
+  useEffect(() => {
+    const disableAds = profile.isPremium || !!activeGame;
+    document.documentElement.setAttribute('data-ads-disabled', disableAds ? 'true' : 'false');
+    try {
+      const win = window as unknown as { adsbygoogle?: { pauseAdRequests?: number } & unknown[] };
+      win.adsbygoogle = win.adsbygoogle || [];
+      win.adsbygoogle.pauseAdRequests = disableAds ? 1 : 0;
+    } catch {
+      // ignore
+    }
+  }, [profile.isPremium, activeGame]);
 
   // Audio settings sync
   useEffect(() => {
@@ -310,6 +332,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPremiumOpen,
         isAdOpen,
         isPlayStoreOpen,
+        isPrivacyOpen,
         setActiveTab,
         startNewGame,
         quitActiveGame,
@@ -327,6 +350,8 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closePremium: () => setIsPremiumOpen(false),
         openPlayStore: () => setIsPlayStoreOpen(true),
         closePlayStore: () => setIsPlayStoreOpen(false),
+        openPrivacy: () => setIsPrivacyOpen(true),
+        closePrivacy: () => setIsPrivacyOpen(false),
         openAdModal: () => setIsAdOpen(true),
         closeAdModal: () => setIsAdOpen(false),
         doubleLastGameXp,

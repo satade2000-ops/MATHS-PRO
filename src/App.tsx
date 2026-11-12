@@ -12,6 +12,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { PremiumModal } from './components/PremiumModal';
 import { AdModal } from './components/AdModal';
 import { PlayStoreModal } from './components/PlayStoreModal';
+import { PrivacyModal } from './components/PrivacyModal';
 
 const MainAppContent: React.FC = () => {
   const { activeTab, activeGame, activeResult, isPlayStoreOpen, closePlayStore } = useMathApp();
@@ -43,6 +44,7 @@ const MainAppContent: React.FC = () => {
         <PremiumModal />
         <AdModal />
         <PlayStoreModal isOpen={isPlayStoreOpen} onClose={closePlayStore} />
+        <PrivacyModal />
       </div>
     </div>
   );

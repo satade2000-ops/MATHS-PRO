@@ -59,8 +59,13 @@ export const Navbar: React.FC = () => {
             onClick={() => handleTabClick('home')}
             className="flex items-center gap-2.5 cursor-pointer group select-none shrink-0"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <span className="translate-y-[-1px]">∑</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform overflow-hidden">
+              <img
+                src="/pwa-192x192.png"
+                alt="MATHS PRO"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">

@@ -3,12 +3,12 @@ import { X, Tv, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 
 export const AdModal: React.FC = () => {
-  const { isAdOpen, closeAdModal, doubleLastGameXp } = useMathApp();
+  const { isAdOpen, closeAdModal, doubleLastGameXp, profile } = useMathApp();
   const [countdown, setCountdown] = useState(4);
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
-    if (!isAdOpen) {
+    if (!isAdOpen || profile.isPremium) {
       setCountdown(4);
       setIsCompleted(false);
       return;
@@ -26,9 +26,9 @@ export const AdModal: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isAdOpen]);
+  }, [isAdOpen, profile.isPremium]);
 
-  if (!isAdOpen) return null;
+  if (!isAdOpen || profile.isPremium) return null;
 
   const handleClaim = () => {
     doubleLastGameXp();

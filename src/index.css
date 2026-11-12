@@ -30,3 +30,14 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
 }
+
+/* Enforce ad suppression during VIP mode or active gameplay */
+html[data-ads-disabled="true"] .adsbygoogle,
+html[data-ads-disabled="true"] .google-auto-placed {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}

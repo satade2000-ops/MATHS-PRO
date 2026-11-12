@@ -18,6 +18,7 @@ import {
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
 import { OPERATIONS_METADATA } from '../utils/constants';
+import { AdSenseBanner } from './AdSenseBanner';
 
 export const ResultScreen: React.FC = () => {
   const {
@@ -242,6 +243,9 @@ export const ResultScreen: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* Discrete AdSense slot after game completion (hidden for Premium users) */}
+          <AdSenseBanner placement="result" />
         </div>
 
         {/* Action Buttons */}

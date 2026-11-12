@@ -1,50 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1E4B"/>
+      <stop offset="55%" stop-color="#0D1538"/>
+      <stop offset="100%" stop-color="#1E1148"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="royalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#3B82F6"/>
-      <stop offset="50%" stop-color="#4F46E5"/>
-      <stop offset="100%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="violetGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
     </linearGradient>
     <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="0%" stop-color="#FDE68A"/>
       <stop offset="100%" stop-color="#F59E0B"/>
     </linearGradient>
-    <filter id="dropGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    <filter id="tileShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="goldGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#FBBF24" flood-opacity="0.6"/>
     </filter>
   </defs>
 
-  <!-- Squircle Background -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <!-- Squircle Midnight Navy Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
 
-  <!-- Subtle grid pattern -->
-  <g opacity="0.08" stroke="#FFFFFF" stroke-width="2">
-    <line x1="0" y1="128" x2="512" y2="128" />
-    <line x1="0" y1="256" x2="512" y2="256" />
-    <line x1="0" y1="384" x2="512" y2="384" />
-    <line x1="128" y1="0" x2="128" y2="512" />
-    <line x1="256" y1="0" x2="256" y2="512" />
-    <line x1="384" y1="0" x2="384" y2="512" />
+  <!-- 2x2 Glossy Math Tiles -->
+  <g filter="url(#tileShadow)">
+    <!-- Top-Left: Addition (+) -->
+    <rect x="74" y="74" width="166" height="166" rx="38" fill="url(#emeraldGrad)" stroke="#34D399" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M157 122 V192 M122 157 H192" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+
+    <!-- Top-Right: Subtraction (-) -->
+    <rect x="272" y="74" width="166" height="166" rx="38" fill="url(#royalGrad)" stroke="#93C5FD" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M320 157 H390" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+
+    <!-- Bottom-Left: Multiplication (x) -->
+    <rect x="74" y="272" width="166" height="166" rx="38" fill="url(#orangeGrad)" stroke="#FDBA74" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M131 329 L183 381 M183 329 L131 381" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+
+    <!-- Bottom-Right: Division (/) -->
+    <rect x="272" y="272" width="166" height="166" rx="38" fill="url(#violetGrad)" stroke="#D8B4FE" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M320 355 H390" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round"/>
+    <circle cx="355" cy="322" r="12" fill="#FFFFFF"/>
+    <circle cx="355" cy="388" r="12" fill="#FFFFFF"/>
   </g>
 
-  <!-- Math Pro Centerpiece (Sigma & Symbols) -->
-  <g filter="url(#dropGlow)">
-    <!-- Central Sigma ∑ -->
-    <path d="M 330 150 L 180 150 L 260 256 L 180 362 L 330 362" 
-          fill="none" 
-          stroke="#FFFFFF" 
-          stroke-width="36" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"/>
-
-    <!-- Small Golden Star on Top Right -->
-    <path d="M 360 110 L 368 128 L 388 130 L 372 144 L 377 163 L 360 153 L 343 163 L 348 144 L 332 130 L 352 128 Z" 
-          fill="url(#goldGrad)" />
-
-    <!-- Corner Math Symbols -->
-    <text x="80" y="120" fill="#34D399" font-family="sans-serif" font-size="44" font-weight="900">+</text>
-    <text x="400" y="270" fill="#F472B6" font-family="sans-serif" font-size="48" font-weight="900">×</text>
-    <text x="90" y="420" fill="#FBBF24" font-family="sans-serif" font-size="52" font-weight="900">÷</text>
-    <text x="390" y="420" fill="#60A5FA" font-family="sans-serif" font-size="44" font-weight="900">−</text>
-  </g>
+  <!-- Central Glowing Badge with Sigma -->
+  <circle cx="256" cy="256" r="46" fill="#0D1538" stroke="url(#goldGrad)" stroke-width="4" filter="url(#goldGlow)"/>
+  <path d="M274 234 H240 L258 256 L240 278 H274" fill="none" stroke="url(#goldGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

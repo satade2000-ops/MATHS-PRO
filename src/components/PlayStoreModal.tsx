@@ -20,10 +20,15 @@ export const PlayStoreModal: React.FC<PlayStoreModalProps> = ({ isOpen, onClose 
           <X className="w-4 h-4" />
         </button>
 
-        {/* Header with Google Play Badge */}
+        {/* Header with App Icon Preview */}
         <div className="text-center pt-2 mb-5">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-indigo-500/20 mb-3">
-            <Smartphone className="w-8 h-8" />
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-indigo-500/25 mb-3 overflow-hidden">
+            <img
+              src="/pwa-512x512.png"
+              alt="Icône MATHS PRO"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover"
+            />
           </div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white font-display">
             Exportation vers Google Play Store

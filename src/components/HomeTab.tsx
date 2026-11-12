@@ -13,6 +13,7 @@ import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
 import { OPERATIONS_METADATA } from '../utils/constants';
 import { MascotEuler } from './MascotEuler';
+import { AdSenseBanner } from './AdSenseBanner';
 import { OperationType } from '../types/math';
 
 export const HomeTab: React.FC = () => {
@@ -23,6 +24,7 @@ export const HomeTab: React.FC = () => {
     claimDailyReward,
     setActiveTab,
     openPlayStore,
+    openPrivacy,
     t,
   } = useMathApp();
 
@@ -289,6 +291,21 @@ export const HomeTab: React.FC = () => {
           message={t('mascotTip')}
         />
       </div>
+
+      {/* Discrete AdSense slot (hidden for Premium users) */}
+      <AdSenseBanner placement="home" />
+
+      {/* Quiet Footer with Privacy & AdSense disclosure */}
+      <footer className="pt-2 pb-4 text-center text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2">
+        <span>MATHS PRO</span>
+        <span aria-hidden="true">·</span>
+        <button
+          onClick={openPrivacy}
+          className="underline hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+        >
+          {settings.language === 'fr' ? 'Confidentialité & Publicité' : 'Privacy & Ads'}
+        </button>
+      </footer>
     </div>
   );
 };

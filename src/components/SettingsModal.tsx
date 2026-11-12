@@ -19,6 +19,7 @@ export const SettingsModal: React.FC = () => {
     isSettingsOpen,
     closeSettings,
     openPlayStore,
+    openPrivacy,
     settings,
     updateSettings,
     resetAllData,
@@ -179,6 +180,20 @@ export const SettingsModal: React.FC = () => {
             >
               <span>📲</span>
               <span>Guide d'exportation Google Play Store (.aab)</span>
+            </button>
+          </div>
+
+          {/* Privacy & AdSense disclosure */}
+          <div>
+            <button
+              onClick={() => {
+                closeSettings();
+                openPrivacy();
+              }}
+              className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+            >
+              <span>🔒</span>
+              <span>{settings.language === 'fr' ? 'Confidentialité & Publicité' : 'Privacy & Advertising'}</span>
             </button>
           </div>
 
