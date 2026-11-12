@@ -1,0 +1,57 @@
+import React from 'react';
+import { MathProvider, useMathApp } from './context/MathContext';
+import { Navbar } from './components/Navbar';
+import { HomeTab } from './components/HomeTab';
+import { GamesTab } from './components/GamesTab';
+import { ChallengesTab } from './components/ChallengesTab';
+import { LeaderboardTab } from './components/LeaderboardTab';
+import { ProfileTab } from './components/ProfileTab';
+import { GameScreen } from './components/GameScreen';
+import { ResultScreen } from './components/ResultScreen';
+import { SettingsModal } from './components/SettingsModal';
+import { PremiumModal } from './components/PremiumModal';
+import { AdModal } from './components/AdModal';
+import { PlayStoreModal } from './components/PlayStoreModal';
+
+const MainAppContent: React.FC = () => {
+  const { activeTab, activeGame, activeResult, isPlayStoreOpen, closePlayStore } = useMathApp();
+
+  return (
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col items-center">
+      {/* Mobile/Tablet Application Container */}
+      <div className="w-full max-w-2xl min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900/90 shadow-xl border-x border-slate-200/60 dark:border-slate-800/60 relative">
+        {/* Navigation Top Bar */}
+        <Navbar />
+
+        {/* Dynamic Tab Content */}
+        <main className="flex-1 px-4 sm:px-6 pt-5">
+          {activeTab === 'home' && <HomeTab />}
+          {activeTab === 'games' && <GamesTab />}
+          {activeTab === 'challenges' && <ChallengesTab />}
+          {activeTab === 'leaderboard' && <LeaderboardTab />}
+          {activeTab === 'profile' && <ProfileTab />}
+        </main>
+
+        {/* Active Fullscreen Game Modal */}
+        {activeGame && <GameScreen />}
+
+        {/* Game Finished Result Modal */}
+        {activeResult && <ResultScreen />}
+
+        {/* Global Modals */}
+        <SettingsModal />
+        <PremiumModal />
+        <AdModal />
+        <PlayStoreModal isOpen={isPlayStoreOpen} onClose={closePlayStore} />
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <MathProvider>
+      <MainAppContent />
+    </MathProvider>
+  );
+}

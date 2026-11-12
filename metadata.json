@@ -1,0 +1,6 @@
+{
+  "name": "MATHS PRO – Jeux de Mathématiques",
+  "description": "Application mobile de jeux mathématiques : addition, soustraction, multiplication, division, calcul mental, pourcentages, fractions, racines carrées et modes de défis interactifs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
