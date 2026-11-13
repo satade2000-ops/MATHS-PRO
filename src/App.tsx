@@ -12,10 +12,13 @@ import { SettingsModal } from './components/SettingsModal';
 import { PremiumModal } from './components/PremiumModal';
 import { AdModal } from './components/AdModal';
 import { PlayStoreModal } from './components/PlayStoreModal';
-import { PrivacyModal } from './components/PrivacyModal';
+import { PrivacyPage } from './components/PrivacyPage';
+import { AboutPage } from './components/AboutPage';
+import { ContactPage } from './components/ContactPage';
+import { AppFooter } from './components/AppFooter';
 
 const MainAppContent: React.FC = () => {
-  const { activeTab, activeGame, activeResult, isPlayStoreOpen, closePlayStore } = useMathApp();
+  const { activeTab, activeInfoPage, activeGame, activeResult, isPlayStoreOpen, closePlayStore } = useMathApp();
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col items-center">
@@ -24,14 +27,27 @@ const MainAppContent: React.FC = () => {
         {/* Navigation Top Bar */}
         <Navbar />
 
-        {/* Dynamic Tab Content */}
+        {/* Dynamic Page or Tab Content */}
         <main className="flex-1 px-4 sm:px-6 pt-5">
-          {activeTab === 'home' && <HomeTab />}
-          {activeTab === 'games' && <GamesTab />}
-          {activeTab === 'challenges' && <ChallengesTab />}
-          {activeTab === 'leaderboard' && <LeaderboardTab />}
-          {activeTab === 'profile' && <ProfileTab />}
+          {activeInfoPage === 'privacy' ? (
+            <PrivacyPage />
+          ) : activeInfoPage === 'about' ? (
+            <AboutPage />
+          ) : activeInfoPage === 'contact' ? (
+            <ContactPage />
+          ) : (
+            <>
+              {activeTab === 'home' && <HomeTab />}
+              {activeTab === 'games' && <GamesTab />}
+              {activeTab === 'challenges' && <ChallengesTab />}
+              {activeTab === 'leaderboard' && <LeaderboardTab />}
+              {activeTab === 'profile' && <ProfileTab />}
+            </>
+          )}
         </main>
+
+        {/* Global Accessible Footer */}
+        <AppFooter />
 
         {/* Active Fullscreen Game Modal */}
         {activeGame && <GameScreen />}
@@ -44,7 +60,6 @@ const MainAppContent: React.FC = () => {
         <PremiumModal />
         <AdModal />
         <PlayStoreModal isOpen={isPlayStoreOpen} onClose={closePlayStore} />
-        <PrivacyModal />
       </div>
     </div>
   );

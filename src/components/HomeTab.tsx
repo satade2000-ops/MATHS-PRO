@@ -24,7 +24,6 @@ export const HomeTab: React.FC = () => {
     claimDailyReward,
     setActiveTab,
     openPlayStore,
-    openPrivacy,
     t,
   } = useMathApp();
 
@@ -37,7 +36,7 @@ export const HomeTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-6">
       {/* Hero Card with Mascot & Player Progression */}
       <div className="relative rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 text-white p-5 sm:p-6 shadow-xl shadow-indigo-500/15 overflow-hidden">
         {/* Subtle decorative background shapes */}
@@ -294,18 +293,6 @@ export const HomeTab: React.FC = () => {
 
       {/* Discrete AdSense slot (hidden for Premium users) */}
       <AdSenseBanner placement="home" />
-
-      {/* Quiet Footer with Privacy & AdSense disclosure */}
-      <footer className="pt-2 pb-4 text-center text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2">
-        <span>MATHS PRO</span>
-        <span aria-hidden="true">·</span>
-        <button
-          onClick={openPrivacy}
-          className="underline hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-        >
-          {settings.language === 'fr' ? 'Confidentialité & Publicité' : 'Privacy & Ads'}
-        </button>
-      </footer>
     </div>
   );
 };

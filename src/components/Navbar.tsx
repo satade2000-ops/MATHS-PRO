@@ -22,7 +22,9 @@ export const Navbar: React.FC = () => {
     profile,
     settings,
     activeTab,
+    activeInfoPage,
     setActiveTab,
+    goHome,
     updateSettings,
     openSettings,
     openPremium,
@@ -33,6 +35,8 @@ export const Navbar: React.FC = () => {
     sound.playClick();
     setActiveTab(tab);
   };
+
+  const isTabActive = (tab: typeof activeTab) => activeInfoPage === null && activeTab === tab;
 
   const toggleSound = () => {
     sound.playClick();
@@ -56,7 +60,10 @@ export const Navbar: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 h-15 flex items-center justify-between gap-3">
           {/* Brand Logo */}
           <div
-            onClick={() => handleTabClick('home')}
+            onClick={() => {
+              sound.playClick();
+              goHome();
+            }}
             className="flex items-center gap-2.5 cursor-pointer group select-none shrink-0"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform overflow-hidden">
@@ -178,14 +185,14 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => handleTabClick('home')}
             className={`flex flex-col items-center justify-center min-h-[48px] py-1 transition-all ${
-              activeTab === 'home'
+              isTabActive('home')
                 ? 'text-indigo-600 dark:text-indigo-400 font-bold scale-105'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
             }`}
           >
             <div className="relative">
-              <Home className={`w-5 h-5 ${activeTab === 'home' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-              {activeTab === 'home' && (
+              <Home className={`w-5 h-5 ${isTabActive('home') ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              {isTabActive('home') && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
               )}
             </div>
@@ -196,14 +203,14 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => handleTabClick('games')}
             className={`flex flex-col items-center justify-center min-h-[48px] py-1 transition-all ${
-              activeTab === 'games'
+              isTabActive('games')
                 ? 'text-indigo-600 dark:text-indigo-400 font-bold scale-105'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
             }`}
           >
             <div className="relative">
-              <Gamepad2 className={`w-5 h-5 ${activeTab === 'games' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-              {activeTab === 'games' && (
+              <Gamepad2 className={`w-5 h-5 ${isTabActive('games') ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              {isTabActive('games') && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
               )}
             </div>
@@ -214,14 +221,14 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => handleTabClick('challenges')}
             className={`flex flex-col items-center justify-center min-h-[48px] py-1 transition-all ${
-              activeTab === 'challenges'
+              isTabActive('challenges')
                 ? 'text-indigo-600 dark:text-indigo-400 font-bold scale-105'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
             }`}
           >
             <div className="relative">
-              <Trophy className={`w-5 h-5 ${activeTab === 'challenges' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-              {activeTab === 'challenges' && (
+              <Trophy className={`w-5 h-5 ${isTabActive('challenges') ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              {isTabActive('challenges') && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
               )}
             </div>
@@ -232,14 +239,14 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => handleTabClick('leaderboard')}
             className={`flex flex-col items-center justify-center min-h-[48px] py-1 transition-all ${
-              activeTab === 'leaderboard'
+              isTabActive('leaderboard')
                 ? 'text-indigo-600 dark:text-indigo-400 font-bold scale-105'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
             }`}
           >
             <div className="relative">
-              <BarChart2 className={`w-5 h-5 ${activeTab === 'leaderboard' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-              {activeTab === 'leaderboard' && (
+              <BarChart2 className={`w-5 h-5 ${isTabActive('leaderboard') ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              {isTabActive('leaderboard') && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
               )}
             </div>
@@ -250,14 +257,14 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => handleTabClick('profile')}
             className={`flex flex-col items-center justify-center min-h-[48px] py-1 transition-all ${
-              activeTab === 'profile'
+              isTabActive('profile')
                 ? 'text-indigo-600 dark:text-indigo-400 font-bold scale-105'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
             }`}
           >
             <div className="relative">
-              <User className={`w-5 h-5 ${activeTab === 'profile' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-              {activeTab === 'profile' && (
+              <User className={`w-5 h-5 ${isTabActive('profile') ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              {isTabActive('profile') && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
               )}
             </div>

@@ -4,10 +4,28 @@ import { sound } from '../utils/audio';
 import { BADGES } from '../utils/constants';
 import { translations } from '../utils/translations';
 
+export type InfoPageType = 'privacy' | 'about' | 'contact' | null;
+
+const getInfoPageFromPath = (pathname: string): InfoPageType => {
+  const clean = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  if (clean === '/confidentialite' || clean === '/privacy') return 'privacy';
+  if (clean === '/a-propos' || clean === '/about') return 'about';
+  if (clean === '/contact') return 'contact';
+  return null;
+};
+
+const getPathFromInfoPage = (page: InfoPageType): string => {
+  if (page === 'privacy') return '/confidentialite';
+  if (page === 'about') return '/a-propos';
+  if (page === 'contact') return '/contact';
+  return '/';
+};
+
 interface MathContextType {
   profile: UserProfile;
   settings: AppSettings;
   activeTab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile';
+  activeInfoPage: InfoPageType;
   activeGame: {
     operation: OperationType;
     mode: GameMode;
@@ -35,9 +53,10 @@ interface MathContextType {
   isPlayStoreOpen: boolean;
   openPlayStore: () => void;
   closePlayStore: () => void;
-  isPrivacyOpen: boolean;
   openPrivacy: () => void;
-  closePrivacy: () => void;
+  openAbout: () => void;
+  openContact: () => void;
+  goHome: () => void;
   openAdModal: () => void;
   closeAdModal: () => void;
   doubleLastGameXp: () => void;
@@ -106,7 +125,10 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return defaultSettings;
   });
 
-  const [activeTab, setActiveTab] = useState<'home' | 'games' | 'challenges' | 'leaderboard' | 'profile'>('home');
+  const [activeTab, setActiveTabState] = useState<'home' | 'games' | 'challenges' | 'leaderboard' | 'profile'>('home');
+  const [activeInfoPage, setActiveInfoPage] = useState<InfoPageType>(() =>
+    typeof window !== 'undefined' ? getInfoPageFromPath(window.location.pathname) : null
+  );
   const [activeGame, setActiveGame] = useState<{
     operation: OperationType;
     mode: GameMode;
@@ -117,7 +139,46 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isPremiumOpen, setIsPremiumOpen] = useState(false);
   const [isAdOpen, setIsAdOpen] = useState(false);
   const [isPlayStoreOpen, setIsPlayStoreOpen] = useState(false);
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+
+  // Sync browser back/forward navigation with info pages
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveInfoPage(getInfoPageFromPath(window.location.pathname));
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateInfoPage = (page: InfoPageType) => {
+    setActiveInfoPage(page);
+    try {
+      const targetPath = getPathFromInfoPage(page);
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ infoPage: page }, '', targetPath);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      // ignore
+    }
+  };
+
+  const setActiveTab = (tab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile') => {
+    setActiveTabState(tab);
+    if (activeInfoPage !== null) {
+      navigateInfoPage(null);
+    } else {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  const goHome = () => {
+    setActiveTabState('home');
+    navigateInfoPage(null);
+  };
 
   // Sync dark class on document element
   useEffect(() => {
@@ -326,13 +387,13 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         settings,
         activeTab,
+        activeInfoPage,
         activeGame,
         activeResult,
         isSettingsOpen,
         isPremiumOpen,
         isAdOpen,
         isPlayStoreOpen,
-        isPrivacyOpen,
         setActiveTab,
         startNewGame,
         quitActiveGame,
@@ -350,8 +411,10 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closePremium: () => setIsPremiumOpen(false),
         openPlayStore: () => setIsPlayStoreOpen(true),
         closePlayStore: () => setIsPlayStoreOpen(false),
-        openPrivacy: () => setIsPrivacyOpen(true),
-        closePrivacy: () => setIsPrivacyOpen(false),
+        openPrivacy: () => navigateInfoPage('privacy'),
+        openAbout: () => navigateInfoPage('about'),
+        openContact: () => navigateInfoPage('contact'),
+        goHome,
         openAdModal: () => setIsAdOpen(true),
         closeAdModal: () => setIsAdOpen(false),
         doubleLastGameXp,

@@ -20,6 +20,8 @@ export const SettingsModal: React.FC = () => {
     closeSettings,
     openPlayStore,
     openPrivacy,
+    openAbout,
+    openContact,
     settings,
     updateSettings,
     resetAllData,
@@ -183,17 +185,37 @@ export const SettingsModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Privacy & AdSense disclosure */}
-          <div>
+          {/* Information pages: Confidentialité, À propos, Contact */}
+          <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => {
                 closeSettings();
                 openPrivacy();
               }}
-              className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+              className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
             >
               <span>🔒</span>
-              <span>{settings.language === 'fr' ? 'Confidentialité & Publicité' : 'Privacy & Advertising'}</span>
+              <span>{settings.language === 'fr' ? 'Confidentialité' : 'Privacy'}</span>
+            </button>
+            <button
+              onClick={() => {
+                closeSettings();
+                openAbout();
+              }}
+              className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+            >
+              <span>ℹ️</span>
+              <span>{settings.language === 'fr' ? 'À propos' : 'About'}</span>
+            </button>
+            <button
+              onClick={() => {
+                closeSettings();
+                openContact();
+              }}
+              className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+            >
+              <span>✉️</span>
+              <span>Contact</span>
             </button>
           </div>
 

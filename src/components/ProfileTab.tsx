@@ -61,7 +61,7 @@ export const ProfileTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-6">
       {/* Profile Header Card */}
       <div className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm">
         <div className="flex items-center gap-4">

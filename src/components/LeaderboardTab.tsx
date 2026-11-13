@@ -25,7 +25,7 @@ export const LeaderboardTab: React.FC = () => {
   const rest = fullList.slice(3);
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-6">
       {/* Title */}
       <div className="px-1">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white font-display">

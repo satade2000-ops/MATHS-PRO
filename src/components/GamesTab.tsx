@@ -68,7 +68,7 @@ export const GamesTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-6">
       {/* Title Header */}
       <div className="px-1">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white font-display">
