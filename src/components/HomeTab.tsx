@@ -12,6 +12,7 @@ import {
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
 import { OPERATIONS_METADATA } from '../utils/constants';
+import { getDifficultyForStage, getTargetScoreForStage } from '../utils/progression';
 import { MascotEuler } from './MascotEuler';
 import { AdSenseBanner } from './AdSenseBanner';
 import { OperationType } from '../types/math';
@@ -32,7 +33,8 @@ export const HomeTab: React.FC = () => {
 
   const handleStartOp = (type: OperationType) => {
     sound.playClick();
-    startNewGame(type, 'learning', settings.selectedDifficulty);
+    const currentStage = Math.max(1, profile.stageByOperation?.[type] || 1);
+    startNewGame(type, 'learning', getDifficultyForStage(currentStage), currentStage);
   };
 
   return (
@@ -149,6 +151,9 @@ export const HomeTab: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {mainOperations.map((op) => {
             const stat = profile.statsByOperation[op.type] || { played: 0, correct: 0, stars: 0 };
+            const currentStage = Math.max(1, profile.stageByOperation?.[op.type] || 1);
+            const stageDiff = getDifficultyForStage(currentStage);
+            const stageGoal = getTargetScoreForStage(currentStage);
 
             return (
               <div
@@ -184,12 +189,20 @@ export const HomeTab: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Title & Description */}
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white font-display tracking-tight">
-                    {t(op.titleKey)}
-                  </h3>
+                  {/* Title, Stage & Description */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white font-display tracking-tight">
+                      {t(op.titleKey)}
+                    </h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 font-bold border border-indigo-200/60 dark:border-indigo-800/60">
+                      {t('stageLabel')} {currentStage} · {t(stageDiff)}
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {t(op.descKey)}
+                  </p>
+                  <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1.5">
+                    🎯 {t('goalLabel')} : {stageGoal} pts
                   </p>
                 </div>
 
@@ -228,33 +241,36 @@ export const HomeTab: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {otherOperations.map((op) => (
-            <div
-              key={op.type}
-              onClick={() => handleStartOp(op.type)}
-              className="p-3.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer flex flex-col justify-between group shadow-xs hover:shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div
-                  className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${op.gradient} text-white flex items-center justify-center font-bold text-base shadow-xs group-hover:scale-105 transition-transform`}
-                >
-                  {op.symbol}
+          {otherOperations.map((op) => {
+            const opStage = Math.max(1, profile.stageByOperation?.[op.type] || 1);
+            return (
+              <div
+                key={op.type}
+                onClick={() => handleStartOp(op.type)}
+                className="p-3.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer flex flex-col justify-between group shadow-xs hover:shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div
+                    className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${op.gradient} text-white flex items-center justify-center font-bold text-base shadow-xs group-hover:scale-105 transition-transform`}
+                  >
+                    {op.symbol}
+                  </div>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold">
+                    P.{opStage}
+                  </span>
                 </div>
-                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold group-hover:translate-x-0.5 transition-transform">
-                  Jouer →
-                </span>
-              </div>
 
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white font-display">
-                  {t(op.titleKey)}
-                </h4>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                  {t(op.descKey)}
-                </p>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white font-display">
+                    {t(op.titleKey)}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                    {t(op.descKey)}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

@@ -43,8 +43,13 @@ function generateDistractors(correctAnswer: number, count = 3, range = 10): numb
   return Array.from(distractors).slice(0, count);
 }
 
-export function generateQuestion(operation: OperationType, difficulty: DifficultyLevel): MathQuestion {
+export function generateQuestion(
+  operation: OperationType,
+  difficulty: DifficultyLevel,
+  stage = 1
+): MathQuestion {
   const id = `q_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const extraStage = Math.max(0, Math.min(stage - 5, 5));
 
   switch (operation) {
     case 'addition': {
@@ -63,8 +68,8 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
         a = getRandomInt(110, 650);
         b = getRandomInt(110, 450);
       } else {
-        a = getRandomInt(750, 4999);
-        b = getRandomInt(650, 4999);
+        a = getRandomInt(750 + extraStage * 300, 4999 + extraStage * 1000);
+        b = getRandomInt(650 + extraStage * 300, 4999 + extraStage * 1000);
       }
 
       const answer = a + b;
@@ -108,8 +113,8 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
         a = getRandomInt(150, 750);
         b = getRandomInt(65, a - 10);
       } else {
-        a = getRandomInt(800, 3500);
-        b = getRandomInt(300, a - 50);
+        a = getRandomInt(800 + extraStage * 400, 3500 + extraStage * 1000);
+        b = getRandomInt(300 + extraStage * 150, a - 50);
       }
 
       const answer = a - b;
@@ -154,8 +159,8 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
         a = getRandomInt(13, 29);
         b = getRandomInt(6, 16);
       } else {
-        a = getRandomInt(24, 75);
-        b = getRandomInt(12, 45);
+        a = getRandomInt(24 + extraStage * 5, 75 + extraStage * 12);
+        b = getRandomInt(12 + extraStage * 2, 45 + extraStage * 8);
       }
 
       const answer = a * b;
@@ -200,8 +205,8 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
         divisor = getRandomInt(6, 15);
         quotient = getRandomInt(15, 45);
       } else {
-        divisor = getRandomInt(12, 35);
-        quotient = getRandomInt(25, 80);
+        divisor = getRandomInt(12 + extraStage * 3, 35 + extraStage * 6);
+        quotient = getRandomInt(25 + extraStage * 5, 80 + extraStage * 15);
       }
 
       const dividend = divisor * quotient;
@@ -231,11 +236,30 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
     }
 
     case 'mental_math': {
-      // Mixed chaining
-      if (difficulty === 'beginner' || difficulty === 'easy') {
-        const a = getRandomInt(10, 30);
-        const b = getRandomInt(5, 15);
-        const c = getRandomInt(2, 10);
+      // Progressive mixed chaining across all 5 levels
+      if (difficulty === 'beginner') {
+        const a = getRandomInt(3, 12);
+        const b = getRandomInt(2, 9);
+        const c = getRandomInt(1, Math.min(8, a + b - 1));
+        const answer = a + b - c;
+        const distractors = generateDistractors(answer, 3, 5);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `${a} + ${b} − ${c} = ?`,
+          operatorSymbol: '±',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `${a} + ${b} = ${a + b}, puis ${a + b} − ${c} = ${answer}.`,
+            en: `${a} + ${b} = ${a + b}, then ${a + b} − ${c} = ${answer}.`,
+          },
+        };
+      } else if (difficulty === 'easy') {
+        const a = getRandomInt(12, 35);
+        const b = getRandomInt(6, 18);
+        const c = getRandomInt(4, 14);
         const answer = a + b - c;
         const distractors = generateDistractors(answer, 3, 6);
         return {
@@ -251,7 +275,7 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
             en: `${a} + ${b} = ${a + b}, then ${a + b} − ${c} = ${answer}.`,
           },
         };
-      } else {
+      } else if (difficulty === 'medium') {
         const a = getRandomInt(3, 8);
         const b = getRandomInt(3, 9);
         const c = getRandomInt(5, 25);
@@ -268,6 +292,44 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
           explanation: {
             fr: `Priorité aux parenthèses : ${a} × ${b} = ${a * b}, puis ${a * b} + ${c} = ${answer}.`,
             en: `Parentheses first: ${a} × ${b} = ${a * b}, then ${a * b} + ${c} = ${answer}.`,
+          },
+        };
+      } else if (difficulty === 'hard') {
+        const a = getRandomInt(6, 14);
+        const b = getRandomInt(5, 12);
+        const c = getRandomInt(8, 35);
+        const answer = a * b - c;
+        const distractors = generateDistractors(answer, 3, 12);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `(${a} × ${b}) − ${c} = ?`,
+          operatorSymbol: '×−',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `${a} × ${b} = ${a * b}, puis ${a * b} − ${c} = ${answer}.`,
+            en: `${a} × ${b} = ${a * b}, then ${a * b} − ${c} = ${answer}.`,
+          },
+        };
+      } else {
+        const a = getRandomInt(11 + extraStage * 2, 24 + extraStage * 4);
+        const b = getRandomInt(6, 14 + extraStage);
+        const c = getRandomInt(15, 65 + extraStage * 10);
+        const answer = a * b + c;
+        const distractors = generateDistractors(answer, 3, 18);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `(${a} × ${b}) + ${c} = ?`,
+          operatorSymbol: '×+',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `${a} × ${b} = ${a * b}, puis ${a * b} + ${c} = ${answer}.`,
+            en: `${a} × ${b} = ${a * b}, then ${a * b} + ${c} = ${answer}.`,
           },
         };
       }
@@ -374,10 +436,21 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
     }
 
     case 'fraction': {
-      // Fraction addition with common denominator or easy reduction
-      const denom = getRandomInt(3, 8);
-      const num1 = getRandomInt(1, denom - 2);
-      const num2 = getRandomInt(1, denom - num1);
+      // Fraction addition scaled progressively by difficulty
+      const denomRange =
+        difficulty === 'beginner'
+          ? [3, 5]
+          : difficulty === 'easy'
+          ? [4, 7]
+          : difficulty === 'medium'
+          ? [5, 10]
+          : difficulty === 'hard'
+          ? [7, 14]
+          : [9 + extraStage, 18 + extraStage * 2];
+
+      const denom = getRandomInt(denomRange[0], denomRange[1]);
+      const num1 = getRandomInt(1, Math.max(1, denom - 2));
+      const num2 = getRandomInt(1, Math.max(1, denom - num1));
       const sumNum = num1 + num2;
 
       const questionText = `${num1}/${denom} + ${num2}/${denom} = ?`;
@@ -391,7 +464,7 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
       const rawOptions = [correctAnswer, wrong1, wrong2, wrong3];
       const uniqueOptions = Array.from(new Set(rawOptions));
       while (uniqueOptions.length < 4) {
-        uniqueOptions.push(`${getRandomInt(1, 9)}/${denom}`);
+        uniqueOptions.push(`${getRandomInt(1, denom + 2)}/${denom}`);
       }
 
       return {
@@ -410,46 +483,97 @@ export function generateQuestion(operation: OperationType, difficulty: Difficult
     }
 
     case 'equation': {
-      // Simple linear equations like x + a = b or a*x = b
-      const isMult = Math.random() > 0.5 && difficulty !== 'beginner';
-      if (isMult) {
-        const xVal = getRandomInt(2, 9);
-        const a = getRandomInt(2, 7);
-        const b = a * xVal;
-        const answer = xVal;
-        const distractors = generateDistractors(answer, 3, 4);
-
-        return {
-          id,
-          operation,
-          difficulty,
-          questionText: `${a}x = ${b}  ⟹  x = ?`,
-          operatorSymbol: '=',
-          correctAnswer: answer,
-          options: shuffleArray([answer, ...distractors]),
-          explanation: {
-            fr: `Pour trouver x, divisez ${b} par ${a} : x = ${b} / ${a} = ${answer}.`,
-            en: `To find x, divide ${b} by ${a}: x = ${b} / ${a} = ${answer}.`,
-          },
-        };
-      } else {
-        const xVal = getRandomInt(3, 25);
-        const a = getRandomInt(4, 20);
+      // Progressive linear equations across all 5 levels
+      if (difficulty === 'beginner') {
+        const xVal = getRandomInt(1, 9);
+        const a = getRandomInt(1, 9);
         const b = xVal + a;
-        const answer = xVal;
-        const distractors = generateDistractors(answer, 3, 5);
-
+        const distractors = generateDistractors(xVal, 3, 4);
         return {
           id,
           operation,
           difficulty,
           questionText: `x + ${a} = ${b}  ⟹  x = ?`,
           operatorSymbol: '=',
-          correctAnswer: answer,
-          options: shuffleArray([answer, ...distractors]),
+          correctAnswer: xVal,
+          options: shuffleArray([xVal, ...distractors]),
           explanation: {
-            fr: `Isolez x en soustrayant ${a} des deux côtés : x = ${b} − ${a} = ${answer}.`,
-            en: `Isolate x by subtracting ${a} from both sides: x = ${b} − ${a} = ${answer}.`,
+            fr: `Soustrayez ${a} des deux côtés : x = ${b} − ${a} = ${xVal}.`,
+            en: `Subtract ${a} from both sides: x = ${b} − ${a} = ${xVal}.`,
+          },
+        };
+      } else if (difficulty === 'easy') {
+        const xVal = getRandomInt(5, 25);
+        const a = getRandomInt(4, 18);
+        const b = xVal + a;
+        const distractors = generateDistractors(xVal, 3, 5);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `x + ${a} = ${b}  ⟹  x = ?`,
+          operatorSymbol: '=',
+          correctAnswer: xVal,
+          options: shuffleArray([xVal, ...distractors]),
+          explanation: {
+            fr: `Isolez x en soustrayant ${a} des deux côtés : x = ${b} − ${a} = ${xVal}.`,
+            en: `Isolate x by subtracting ${a} from both sides: x = ${b} − ${a} = ${xVal}.`,
+          },
+        };
+      } else if (difficulty === 'medium') {
+        const xVal = getRandomInt(2, 12);
+        const a = getRandomInt(2, 9);
+        const b = a * xVal;
+        const distractors = generateDistractors(xVal, 3, 4);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `${a}x = ${b}  ⟹  x = ?`,
+          operatorSymbol: '=',
+          correctAnswer: xVal,
+          options: shuffleArray([xVal, ...distractors]),
+          explanation: {
+            fr: `Pour trouver x, divisez ${b} par ${a} : x = ${b} / ${a} = ${xVal}.`,
+            en: `To find x, divide ${b} by ${a}: x = ${b} / ${a} = ${xVal}.`,
+          },
+        };
+      } else if (difficulty === 'hard') {
+        const xVal = getRandomInt(2, 12);
+        const a = getRandomInt(2, 7);
+        const c = getRandomInt(2, 15);
+        const b = a * xVal + c;
+        const distractors = generateDistractors(xVal, 3, 5);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `${a}x + ${c} = ${b}  ⟹  x = ?`,
+          operatorSymbol: '=',
+          correctAnswer: xVal,
+          options: shuffleArray([xVal, ...distractors]),
+          explanation: {
+            fr: `${a}x = ${b} − ${c} = ${b - c}, donc x = ${b - c} / ${a} = ${xVal}.`,
+            en: `${a}x = ${b} − ${c} = ${b - c}, so x = ${b - c} / ${a} = ${xVal}.`,
+          },
+        };
+      } else {
+        const xVal = getRandomInt(4 + extraStage, 18 + extraStage * 2);
+        const a = getRandomInt(3, 11 + extraStage);
+        const c = getRandomInt(5, 30 + extraStage * 5);
+        const b = a * xVal - c;
+        const distractors = generateDistractors(xVal, 3, 6);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `${a}x − ${c} = ${b}  ⟹  x = ?`,
+          operatorSymbol: '=',
+          correctAnswer: xVal,
+          options: shuffleArray([xVal, ...distractors]),
+          explanation: {
+            fr: `${a}x = ${b} + ${c} = ${b + c}, donc x = ${b + c} / ${a} = ${xVal}.`,
+            en: `${a}x = ${b} + ${c} = ${b + c}, so x = ${b + c} / ${a} = ${xVal}.`,
           },
         };
       }

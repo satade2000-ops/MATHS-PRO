@@ -112,6 +112,13 @@ export const translations = {
     backHome: 'Retour à l’accueil',
     reviewQuestions: 'Revoir les calculs de la partie',
     doubleXpAd: 'Doubler mes XP (+Pub)',
+    stageLabel: 'Partie',
+    goalLabel: 'Objectif',
+    stageVictoryTitle: 'VICTOIRE !',
+    stageCompletedMsg: 'Objectif de points atteint !',
+    continueNextStage: 'Continuer · Partie',
+    nextStagePreview: 'Difficulté suivante',
+    seeResults: 'Voir les résultats',
 
     // Leaderboard
     leaderboardTitle: 'Classement Général',
@@ -272,6 +279,13 @@ export const translations = {
     backHome: 'Back to Home',
     reviewQuestions: 'Review Questions & Explanations',
     doubleXpAd: 'Double my XP (+Ad)',
+    stageLabel: 'Stage',
+    goalLabel: 'Goal',
+    stageVictoryTitle: 'VICTORY!',
+    stageCompletedMsg: 'Score goal reached!',
+    continueNextStage: 'Continue · Stage',
+    nextStagePreview: 'Next difficulty',
+    seeResults: 'View Results',
 
     // Leaderboard
     leaderboardTitle: 'Global Leaderboard',

@@ -46,6 +46,9 @@ export interface QuestionAnswerRecord {
 export interface GameResult {
   id: string;
   score: number;
+  targetScore?: number;
+  stage?: number;
+  isVictory?: boolean;
   correctCount: number;
   incorrectCount: number;
   totalQuestions: number;
@@ -93,6 +96,7 @@ export interface UserProfile {
   isPremium: boolean;
   unlockedBadges: string[];
   statsByOperation: Record<OperationType, OperationStat>;
+  stageByOperation?: Partial<Record<OperationType, number>>;
   gameHistory: GameResult[];
 }
 

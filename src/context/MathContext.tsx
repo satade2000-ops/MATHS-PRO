@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AppSettings, DifficultyLevel, GameMode, GameResult, OperationType, UserProfile } from '../types/math';
 import { sound } from '../utils/audio';
 import { BADGES } from '../utils/constants';
+import { getDifficultyForStage, getStageForDifficulty, getTargetScoreForStage } from '../utils/progression';
 import { translations } from '../utils/translations';
 
 export type InfoPageType = 'privacy' | 'about' | 'contact' | null;
@@ -30,13 +31,21 @@ interface MathContextType {
     operation: OperationType;
     mode: GameMode;
     difficulty: DifficultyLevel;
+    stage: number;
+    targetScore: number;
   } | null;
   activeResult: GameResult | null;
   isSettingsOpen: boolean;
   isPremiumOpen: boolean;
   isAdOpen: boolean;
   setActiveTab: (tab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile') => void;
-  startNewGame: (operation: OperationType, mode: GameMode, difficulty?: DifficultyLevel) => void;
+  startNewGame: (
+    operation: OperationType,
+    mode: GameMode,
+    difficulty?: DifficultyLevel,
+    stage?: number
+  ) => void;
+  startNextStage: (operation: OperationType, mode: GameMode, currentStage: number) => void;
   quitActiveGame: () => void;
   finishGame: (result: GameResult) => void;
   closeResultScreen: () => void;
@@ -88,6 +97,18 @@ const defaultProfile: UserProfile = {
     fraction: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
     equation: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
   },
+  stageByOperation: {
+    addition: 1,
+    subtraction: 1,
+    multiplication: 1,
+    division: 1,
+    mental_math: 1,
+    square_root: 1,
+    percentage: 1,
+    power: 1,
+    fraction: 1,
+    equation: 1,
+  },
   gameHistory: [],
 };
 
@@ -108,7 +129,21 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile>(() => {
     try {
       const saved = localStorage.getItem('maths_pro_profile_v2');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultProfile,
+          ...parsed,
+          statsByOperation: {
+            ...defaultProfile.statsByOperation,
+            ...(parsed?.statsByOperation || {}),
+          },
+          stageByOperation: {
+            ...defaultProfile.stageByOperation,
+            ...(parsed?.stageByOperation || {}),
+          },
+        };
+      }
     } catch {
       // ignore
     }
@@ -133,6 +168,8 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     operation: OperationType;
     mode: GameMode;
     difficulty: DifficultyLevel;
+    stage: number;
+    targetScore: number;
   } | null>(null);
   const [activeResult, setActiveResult] = useState<GameResult | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -238,15 +275,35 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return dict?.[key] || fallback?.[key] || key;
   };
 
-  const startNewGame = (operation: OperationType, mode: GameMode, difficulty?: DifficultyLevel) => {
+  const startNewGame = (
+    operation: OperationType,
+    mode: GameMode,
+    difficulty?: DifficultyLevel,
+    stage?: number
+  ) => {
     sound.playClick();
-    const finalDiff = difficulty || settings.selectedDifficulty;
+    const resolvedStage =
+      stage !== undefined
+        ? Math.max(1, stage)
+        : difficulty !== undefined
+        ? getStageForDifficulty(difficulty)
+        : Math.max(1, profile.stageByOperation?.[operation] || 1);
+    const finalDiff = difficulty || getDifficultyForStage(resolvedStage);
+    const targetScore = getTargetScoreForStage(resolvedStage);
     setActiveResult(null);
     setActiveGame({
       operation,
       mode,
       difficulty: finalDiff,
+      stage: resolvedStage,
+      targetScore,
     });
+  };
+
+  const startNextStage = (operation: OperationType, mode: GameMode, currentStage: number) => {
+    const nextStage = Math.max(1, currentStage + 1);
+    const nextDiff = getDifficultyForStage(nextStage);
+    startNewGame(operation, mode, nextDiff, nextStage);
   };
 
   const quitActiveGame = () => {
@@ -299,12 +356,17 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
 
+      const currentSavedStage = prev.stageByOperation?.[result.operation] || 1;
+      const nextUnlockedStage = result.isVictory
+        ? Math.max(currentSavedStage, (result.stage || currentSavedStage) + 1)
+        : currentSavedStage;
+
       return {
         ...prev,
         level: newLevel,
         xp: newXp,
         xpToNextLevel: newXpToNext,
-        coins: newCoins,
+        coins: newCoins + (result.isVictory ? 15 : 0),
         totalStars: prev.totalStars + result.starsEarned,
         unlockedBadges: unlocked,
         statsByOperation: {
@@ -316,6 +378,10 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
             bestScore: newBestScore,
             stars: newOpStars,
           },
+        },
+        stageByOperation: {
+          ...(prev.stageByOperation || {}),
+          [result.operation]: nextUnlockedStage,
         },
         gameHistory: [result, ...prev.gameHistory.slice(0, 19)],
       };
@@ -396,6 +462,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPlayStoreOpen,
         setActiveTab,
         startNewGame,
+        startNextStage,
         quitActiveGame,
         finishGame,
         closeResultScreen,

@@ -14,6 +14,7 @@ import { useMathApp } from '../context/MathContext';
 import { DifficultyLevel, GameMode, OperationType } from '../types/math';
 import { sound } from '../utils/audio';
 import { OPERATIONS_METADATA } from '../utils/constants';
+import { getStageForDifficulty, getTargetScoreForStage } from '../utils/progression';
 
 export const GamesTab: React.FC = () => {
   const {
@@ -61,10 +62,12 @@ export const GamesTab: React.FC = () => {
   ];
 
   const difficulties: DifficultyLevel[] = ['beginner', 'easy', 'medium', 'hard', 'expert'];
+  const previewStage = getStageForDifficulty(selectedDiff);
+  const previewGoal = getTargetScoreForStage(previewStage);
 
   const handleLaunchGame = (op: OperationType) => {
     sound.playClick();
-    startNewGame(op, selectedMode, selectedDiff);
+    startNewGame(op, selectedMode, selectedDiff, previewStage);
   };
 
   return (
@@ -158,9 +161,14 @@ export const GamesTab: React.FC = () => {
 
       {/* 2. Difficulty Level Selector */}
       <div className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
-        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-2.5">
-          2. Niveau de difficulté
-        </span>
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            2. Niveau de difficulté
+          </span>
+          <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+            {t('stageLabel')} {previewStage} · 🎯 {previewGoal} pts
+          </span>
+        </div>
 
         <div className="grid grid-cols-5 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80">
           {difficulties.map((diff) => (

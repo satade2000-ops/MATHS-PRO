@@ -8,16 +8,17 @@ import {
   XCircle,
   Clock,
   Percent,
-  Sparkles,
   ChevronDown,
   ChevronUp,
-  Share2,
   ArrowRight,
   Tv,
+  Sparkles,
+  Target,
 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
 import { OPERATIONS_METADATA } from '../utils/constants';
+import { getDifficultyForStage, getTargetScoreForStage } from '../utils/progression';
 import { AdSenseBanner } from './AdSenseBanner';
 
 export const ResultScreen: React.FC = () => {
@@ -25,9 +26,11 @@ export const ResultScreen: React.FC = () => {
     activeResult,
     closeResultScreen,
     startNewGame,
+    startNextStage,
     setActiveTab,
     openAdModal,
     profile,
+    settings,
     t,
   } = useMathApp();
 
@@ -36,12 +39,12 @@ export const ResultScreen: React.FC = () => {
   useEffect(() => {
     if (!activeResult) return;
 
-    if (activeResult.accuracy >= 70) {
+    if (activeResult.isVictory || activeResult.accuracy >= 70) {
       sound.playVictory();
       try {
         confetti({
-          particleCount: 80,
-          spread: 70,
+          particleCount: activeResult.isVictory ? 100 : 70,
+          spread: 75,
           origin: { y: 0.6 },
           colors: ['#4F46E5', '#10B981', '#F59E0B', '#EC4899', '#3B82F6'],
         });
@@ -53,13 +56,30 @@ export const ResultScreen: React.FC = () => {
 
   if (!activeResult) return null;
 
+  const isFr = settings.language === 'fr';
+  const currentStage = activeResult.stage || 1;
+  const nextStage = currentStage + 1;
+  const nextDifficulty = getDifficultyForStage(nextStage);
+  const nextTargetScore = getTargetScoreForStage(nextStage);
+  const isVictory = Boolean(activeResult.isVictory);
+
   const opMeta =
     OPERATIONS_METADATA.find((m) => m.type === activeResult.operation) ||
     OPERATIONS_METADATA[0];
 
+  const handleContinueNext = () => {
+    sound.playClick();
+    startNextStage(activeResult.operation, activeResult.mode, currentStage);
+  };
+
   const handleReplay = () => {
     sound.playClick();
-    startNewGame(activeResult.operation, activeResult.mode, activeResult.difficulty);
+    startNewGame(
+      activeResult.operation,
+      activeResult.mode,
+      activeResult.difficulty,
+      currentStage
+    );
   };
 
   const handleChangeOperation = () => {
@@ -74,20 +94,33 @@ export const ResultScreen: React.FC = () => {
     setActiveTab('home');
   };
 
-  const titleMessage =
-    activeResult.accuracy >= 90
-      ? t('victoryExcellent')
-      : activeResult.accuracy >= 60
-      ? t('victoryGood')
-      : t('victoryPractice');
+  const titleMessage = isVictory
+    ? isFr
+      ? `PARTIE ${currentStage} RÉUSSIE !`
+      : `STAGE ${currentStage} COMPLETE!`
+    : activeResult.accuracy >= 60
+    ? t('victoryGood')
+    : t('victoryPractice');
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[94vh] overflow-hidden animate-fadeIn">
+    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[94vh] overflow-hidden animate-victoryPop">
         {/* Header Hero */}
-        <div className="relative p-6 text-center bg-gradient-to-b from-indigo-500/10 via-slate-50 to-white dark:from-indigo-950/40 dark:via-slate-850 dark:to-slate-900 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
+        <div
+          className={`relative p-6 text-center border-b border-slate-200/80 dark:border-slate-800/80 shrink-0 ${
+            isVictory
+              ? 'bg-gradient-to-b from-amber-500/15 via-indigo-500/10 to-white dark:from-amber-950/40 dark:via-slate-850 dark:to-slate-900'
+              : 'bg-gradient-to-b from-indigo-500/10 via-slate-50 to-white dark:from-indigo-950/40 dark:via-slate-850 dark:to-slate-900'
+          }`}
+        >
           {/* Trophy Icon */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-500/20 mb-3">
+          <div
+            className={`w-16 h-16 rounded-2xl text-white flex items-center justify-center mx-auto shadow-lg mb-3 ${
+              isVictory
+                ? 'bg-gradient-to-tr from-amber-400 to-orange-500 shadow-orange-500/30 animate-victoryFloat'
+                : 'bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-indigo-500/20'
+            }`}
+          >
             <Trophy className="w-9 h-9" />
           </div>
 
@@ -101,7 +134,7 @@ export const ResultScreen: React.FC = () => {
             {titleMessage}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 capitalize">
-            {t(opMeta.titleKey)} · {t(activeResult.difficulty)} ·{' '}
+            {t(opMeta.titleKey)} · {t('stageLabel')} {currentStage} ({t(activeResult.difficulty)}) ·{' '}
             {t(activeResult.mode)}
           </p>
 
@@ -124,18 +157,46 @@ export const ResultScreen: React.FC = () => {
 
         {/* Scrollable Metrics & Review */}
         <div className="flex-1 p-5 overflow-y-auto space-y-4">
+          {/* Next Stage Progression Callout on Victory */}
+          {isVictory && (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-indigo-500/15 border border-emerald-400/50 dark:border-emerald-700/60 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">
+                    {isFr ? 'Partie suivante débloquée' : 'Next stage unlocked'}
+                  </span>
+                  <span className="text-xs font-black text-slate-900 dark:text-white">
+                    {t('stageLabel')} {nextStage} · {t(nextDifficulty)}
+                  </span>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] font-mono font-extrabold text-indigo-600 dark:text-indigo-400 shrink-0">
+                {nextTargetScore} pts
+              </span>
+            </div>
+          )}
+
           {/* Main Score & XP Banner */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-800/60 text-center">
-              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                {t('finalScore')}
+              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center justify-center gap-1">
+                <Target className="w-3 h-3" />
+                <span>{t('finalScore')}</span>
               </span>
               <div className="text-3xl font-black text-slate-900 dark:text-white font-mono tabular-nums mt-0.5">
                 {activeResult.score}
               </div>
+              {activeResult.targetScore && (
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                  {t('goalLabel')} : {activeResult.targetScore} pts
+                </span>
+              )}
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 text-center">
+            <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 text-center flex flex-col justify-center">
               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                 {t('xpEarned')}
               </span>
@@ -234,7 +295,7 @@ export const ResultScreen: React.FC = () => {
                       </div>
                       {!item.isCorrect && (
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          {item.question.explanation.fr}
+                          {isFr ? item.question.explanation.fr : item.question.explanation.en}
                         </p>
                       )}
                     </div>
@@ -250,29 +311,67 @@ export const ResultScreen: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700/80 flex flex-col gap-2 shrink-0">
-          <button
-            onClick={handleReplay}
-            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md active:scale-98 transition-transform"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>{t('replay')}</span>
-          </button>
+          {isVictory ? (
+            <>
+              <button
+                onClick={handleContinueNext}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-indigo-600 hover:brightness-105 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 active:scale-98 transition-all"
+              >
+                <span>
+                  {t('continueNextStage')} {nextStage} ({t(nextDifficulty)})
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={handleReplay}
+                  className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 active:scale-98 transition-transform"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{t('replay')}</span>
+                </button>
+                <button
+                  onClick={handleChangeOperation}
+                  className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 active:scale-98 transition-transform"
+                >
+                  <span>{t('navGames')}</span>
+                </button>
+                <button
+                  onClick={handleGoHome}
+                  className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 active:scale-98 transition-transform"
+                >
+                  <Home className="w-3.5 h-3.5" />
+                  <span>{t('navHome')}</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleReplay}
+                className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md active:scale-98 transition-transform"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>{t('replay')}</span>
+              </button>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={handleChangeOperation}
-              className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-98 transition-transform"
-            >
-              <span>{t('changeOperation')}</span>
-            </button>
-            <button
-              onClick={handleGoHome}
-              className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-98 transition-transform"
-            >
-              <Home className="w-3.5 h-3.5" />
-              <span>{t('backHome')}</span>
-            </button>
-          </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={handleChangeOperation}
+                  className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-98 transition-transform"
+                >
+                  <span>{t('changeOperation')}</span>
+                </button>
+                <button
+                  onClick={handleGoHome}
+                  className="py-2.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-98 transition-transform"
+                >
+                  <Home className="w-3.5 h-3.5" />
+                  <span>{t('backHome')}</span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
