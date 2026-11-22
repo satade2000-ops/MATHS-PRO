@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { AppSettings, DifficultyLevel, GameMode, GameResult, OperationType, UserProfile } from '../types/math';
 import { sound } from '../utils/audio';
 import { BADGES } from '../utils/constants';
@@ -38,6 +38,7 @@ interface MathContextType {
   isSettingsOpen: boolean;
   isPremiumOpen: boolean;
   isAdOpen: boolean;
+  showExitPrompt: boolean;
   setActiveTab: (tab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile') => void;
   startNewGame: (
     operation: OperationType,
@@ -176,23 +177,142 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isPremiumOpen, setIsPremiumOpen] = useState(false);
   const [isAdOpen, setIsAdOpen] = useState(false);
   const [isPlayStoreOpen, setIsPlayStoreOpen] = useState(false);
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
 
-  // Sync browser back/forward navigation with info pages
+  const exitArmedRef = useRef(false);
+  const exitTimerRef = useRef<number | null>(null);
+  const isExitingRef = useRef(false);
+
+  const latestNavStateRef = useRef({
+    activeGame,
+    activeResult,
+    activeInfoPage,
+    activeTab,
+    isSettingsOpen,
+    isPremiumOpen,
+    isAdOpen,
+    isPlayStoreOpen,
+  });
+
+  latestNavStateRef.current = {
+    activeGame,
+    activeResult,
+    activeInfoPage,
+    activeTab,
+    isSettingsOpen,
+    isPremiumOpen,
+    isAdOpen,
+    isPlayStoreOpen,
+  };
+
+  const clearExitArm = () => {
+    if (exitTimerRef.current !== null) {
+      clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+    }
+    exitArmedRef.current = false;
+    setShowExitPrompt(false);
+  };
+
+  const ensureHistoryGuard = (path?: string) => {
+    try {
+      const targetPath = path || window.location.pathname || '/';
+      if (!window.history.state?.__mathsProGuard) {
+        window.history.pushState({ __mathsProGuard: true, path: targetPath }, '', targetPath);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  // Initialize base + guard history entry and handle Back button (Retour) cleanly
   useEffect(() => {
+    try {
+      const initialPath = window.location.pathname || '/';
+      if (!window.history.state?.__mathsProGuard && !window.history.state?.__mathsProBase) {
+        window.history.replaceState({ __mathsProBase: true, path: initialPath }, '', initialPath);
+        window.history.pushState({ __mathsProGuard: true, path: initialPath }, '', initialPath);
+      }
+    } catch {
+      // ignore
+    }
+
     const handlePopState = () => {
-      setActiveInfoPage(getInfoPageFromPath(window.location.pathname));
+      if (isExitingRef.current) return;
+
+      const s = latestNavStateRef.current;
+
+      // 1. Close any open modal first
+      if (s.isSettingsOpen || s.isPremiumOpen || s.isAdOpen || s.isPlayStoreOpen) {
+        sound.playClick();
+        setIsSettingsOpen(false);
+        setIsPremiumOpen(false);
+        setIsAdOpen(false);
+        setIsPlayStoreOpen(false);
+        clearExitArm();
+        ensureHistoryGuard(s.activeInfoPage ? getPathFromInfoPage(s.activeInfoPage) : '/');
+        return;
+      }
+
+      // 2. If inside a game or on result screen -> return to Main Menu (do not exit app)
+      if (s.activeGame !== null || s.activeResult !== null) {
+        sound.playClick();
+        setActiveGame(null);
+        setActiveResult(null);
+        setActiveInfoPage(null);
+        setActiveTabState('home');
+        clearExitArm();
+        ensureHistoryGuard('/');
+        return;
+      }
+
+      // 3. If on an info page or secondary tab -> return to Main Menu
+      if (s.activeInfoPage !== null || s.activeTab !== 'home') {
+        sound.playClick();
+        setActiveInfoPage(null);
+        setActiveTabState('home');
+        clearExitArm();
+        ensureHistoryGuard('/');
+        return;
+      }
+
+      // 4. Already on Main Menu -> require double Back press to exit
+      if (exitArmedRef.current) {
+        clearExitArm();
+        isExitingRef.current = true;
+        try {
+          window.history.back();
+        } catch {
+          // ignore
+        }
+        return;
+      }
+
+      exitArmedRef.current = true;
+      setShowExitPrompt(true);
+      ensureHistoryGuard('/');
+
+      if (exitTimerRef.current !== null) clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = window.setTimeout(() => {
+        exitArmedRef.current = false;
+        setShowExitPrompt(false);
+        exitTimerRef.current = null;
+      }, 2200);
     };
+
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (exitTimerRef.current !== null) clearTimeout(exitTimerRef.current);
+    };
   }, []);
 
   const navigateInfoPage = (page: InfoPageType) => {
+    clearExitArm();
     setActiveInfoPage(page);
     try {
       const targetPath = getPathFromInfoPage(page);
-      if (window.location.pathname !== targetPath) {
-        window.history.pushState({ infoPage: page }, '', targetPath);
-      }
+      window.history.replaceState({ __mathsProGuard: true, infoPage: page }, '', targetPath);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch {
       // ignore
@@ -200,7 +320,9 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setActiveTab = (tab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile') => {
+    clearExitArm();
     setActiveTabState(tab);
+    ensureHistoryGuard('/');
     if (activeInfoPage !== null) {
       navigateInfoPage(null);
     } else {
@@ -213,6 +335,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const goHome = () => {
+    clearExitArm();
     setActiveTabState('home');
     navigateInfoPage(null);
   };
@@ -282,6 +405,8 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     stage?: number
   ) => {
     sound.playClick();
+    clearExitArm();
+    ensureHistoryGuard('/');
     const resolvedStage =
       stage !== undefined
         ? Math.max(1, stage)
@@ -308,7 +433,11 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const quitActiveGame = () => {
     sound.playClick();
+    clearExitArm();
     setActiveGame(null);
+    setActiveResult(null);
+    setActiveInfoPage(null);
+    setActiveTabState('home');
   };
 
   const finishGame = (result: GameResult) => {
@@ -460,6 +589,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPremiumOpen,
         isAdOpen,
         isPlayStoreOpen,
+        showExitPrompt,
         setActiveTab,
         startNewGame,
         startNextStage,
