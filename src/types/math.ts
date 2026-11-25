@@ -8,7 +8,11 @@ export type OperationType =
   | 'percentage'
   | 'power'
   | 'fraction'
-  | 'equation';
+  | 'equation'
+  | 'geometry'
+  | 'functions'
+  | 'statistics'
+  | 'probability';
 
 export type DifficultyLevel = 'beginner' | 'easy' | 'medium' | 'hard' | 'expert';
 
@@ -109,4 +113,11 @@ export interface AppSettings {
   timedDuration: 30 | 60 | 120;
   examQuestionsCount: 10 | 20 | 50;
   selectedDifficulty: DifficultyLevel;
+}
+
+export interface CookieConsentState {
+  decided: boolean;
+  essential: true;
+  ads: boolean;
+  updatedAt: string;
 }

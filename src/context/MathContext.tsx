@@ -1,17 +1,29 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { AppSettings, DifficultyLevel, GameMode, GameResult, OperationType, UserProfile } from '../types/math';
+import {
+  AppSettings,
+  CookieConsentState,
+  DifficultyLevel,
+  GameMode,
+  GameResult,
+  OperationType,
+  UserProfile,
+} from '../types/math';
+import { SITE_CONFIG } from '../config/siteConfig';
 import { sound } from '../utils/audio';
 import { BADGES } from '../utils/constants';
 import { getDifficultyForStage, getStageForDifficulty, getTargetScoreForStage } from '../utils/progression';
 import { translations } from '../utils/translations';
 
-export type InfoPageType = 'privacy' | 'about' | 'contact' | null;
+export type InfoPageType = 'privacy' | 'about' | 'contact' | 'terms' | 'legal' | 'lessons' | null;
 
 const getInfoPageFromPath = (pathname: string): InfoPageType => {
   const clean = pathname.toLowerCase().replace(/\/+$/, '') || '/';
   if (clean === '/confidentialite' || clean === '/privacy') return 'privacy';
   if (clean === '/a-propos' || clean === '/about') return 'about';
   if (clean === '/contact') return 'contact';
+  if (clean === '/conditions-utilisation' || clean === '/terms') return 'terms';
+  if (clean === '/mentions-legales' || clean === '/legal') return 'legal';
+  if (clean === '/cours' || clean === '/lessons') return 'lessons';
   return null;
 };
 
@@ -19,12 +31,100 @@ const getPathFromInfoPage = (page: InfoPageType): string => {
   if (page === 'privacy') return '/confidentialite';
   if (page === 'about') return '/a-propos';
   if (page === 'contact') return '/contact';
+  if (page === 'terms') return '/conditions-utilisation';
+  if (page === 'legal') return '/mentions-legales';
+  if (page === 'lessons') return '/cours';
   return '/';
+};
+
+const getSeoMeta = (
+  page: InfoPageType,
+  lang: 'fr' | 'en'
+): { title: string; description: string; path: string } => {
+  const path = getPathFromInfoPage(page);
+  if (page === 'lessons') {
+    return {
+      path,
+      title: lang === 'fr' ? 'Cours & Fiches Méthode – MATHS PRO' : 'Lessons & Study Guides – MATHS PRO',
+      description:
+        lang === 'fr'
+          ? 'Cours de mathématiques gratuits, formules et exemples corrigés : arithmétique, algèbre, géométrie, fractions, équations, fonctions, statistiques et probabilités.'
+          : 'Free math lessons, formulas, and worked examples covering arithmetic, algebra, geometry, fractions, equations, functions, statistics, and probability.',
+    };
+  }
+  if (page === 'about') {
+    return {
+      path,
+      title: lang === 'fr' ? 'À propos – MATHS PRO' : 'About – MATHS PRO',
+      description:
+        lang === 'fr'
+          ? 'Découvrez la mission pédagogique de MATHS PRO : apprendre les mathématiques en s’amusant grâce aux jeux, cours et défis.'
+          : 'Discover MATHS PRO’s educational mission: learn mathematics while having fun with interactive games, lessons, and challenges.',
+    };
+  }
+  if (page === 'contact') {
+    return {
+      path,
+      title: lang === 'fr' ? 'Contact – MATHS PRO' : 'Contact – MATHS PRO',
+      description:
+        lang === 'fr'
+          ? 'Contactez l’équipe de MATHS PRO pour toute question pédagogique, technique ou liée à la confidentialité.'
+          : 'Contact the MATHS PRO team for educational, technical, or privacy inquiries.',
+    };
+  }
+  if (page === 'privacy') {
+    return {
+      path,
+      title: lang === 'fr' ? 'Politique de Confidentialité – MATHS PRO' : 'Privacy Policy – MATHS PRO',
+      description:
+        lang === 'fr'
+          ? 'Transparence sur le stockage local, les cookies, Google AdSense et vos droits sur MATHS PRO.'
+          : 'Details on local storage, cookies, Google AdSense, and user privacy rights on MATHS PRO.',
+    };
+  }
+  if (page === 'terms') {
+    return {
+      path,
+      title: lang === 'fr' ? "Conditions Générales d'Utilisation – MATHS PRO" : 'Terms of Use – MATHS PRO',
+      description:
+        lang === 'fr'
+          ? "Conditions générales d'utilisation de la plateforme éducative MATHS PRO."
+          : 'Terms and conditions governing use of the MATHS PRO educational platform.',
+    };
+  }
+  if (page === 'legal') {
+    return {
+      path,
+      title: lang === 'fr' ? 'Mentions Légales – MATHS PRO' : 'Legal Notice – MATHS PRO',
+      description:
+        lang === 'fr'
+          ? 'Mentions légales, hébergement Vercel et informations éditeur de MATHS PRO.'
+          : 'Legal notice, Vercel hosting details, and publisher disclosures for MATHS PRO.',
+    };
+  }
+  return {
+    path: '/',
+    title: 'MATHS PRO – Jeux de Mathématiques',
+    description:
+      lang === 'fr'
+        ? 'Plateforme éducative de mathématiques : cours, fiches méthode et jeux interactifs (arithmétique, algèbre, géométrie, fractions, équations, fonctions, statistiques et probabilités).'
+        : 'Interactive math learning platform: lessons, study guides, and practice games covering arithmetic, algebra, geometry, fractions, equations, functions, statistics, and probability.',
+  };
+};
+
+const CONSENT_STORAGE_KEY = 'maths_pro_consent_v1';
+
+const defaultConsent: CookieConsentState = {
+  decided: false,
+  essential: true,
+  ads: false,
+  updatedAt: '',
 };
 
 interface MathContextType {
   profile: UserProfile;
   settings: AppSettings;
+  cookieConsent: CookieConsentState;
   activeTab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile';
   activeInfoPage: InfoPageType;
   activeGame: {
@@ -38,6 +138,7 @@ interface MathContextType {
   isSettingsOpen: boolean;
   isPremiumOpen: boolean;
   isAdOpen: boolean;
+  isCookieModalOpen: boolean;
   showExitPrompt: boolean;
   setActiveTab: (tab: 'home' | 'games' | 'challenges' | 'leaderboard' | 'profile') => void;
   startNewGame: (
@@ -66,9 +167,17 @@ interface MathContextType {
   openPrivacy: () => void;
   openAbout: () => void;
   openContact: () => void;
+  openTerms: () => void;
+  openLegalNotice: () => void;
+  openLessons: () => void;
   goHome: () => void;
   openAdModal: () => void;
   closeAdModal: () => void;
+  openCookieModal: () => void;
+  closeCookieModal: () => void;
+  acceptAllCookies: () => void;
+  rejectOptionalCookies: () => void;
+  saveCustomCookieConsent: (allowAds: boolean) => void;
   doubleLastGameXp: () => void;
   t: (key: string) => string;
 }
@@ -97,6 +206,10 @@ const defaultProfile: UserProfile = {
     power: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
     fraction: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
     equation: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
+    geometry: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
+    functions: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
+    statistics: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
+    probability: { played: 0, correct: 0, total: 0, bestScore: 0, stars: 0 },
   },
   stageByOperation: {
     addition: 1,
@@ -109,6 +222,10 @@ const defaultProfile: UserProfile = {
     power: 1,
     fraction: 1,
     equation: 1,
+    geometry: 1,
+    functions: 1,
+    statistics: 1,
+    probability: 1,
   },
   gameHistory: [],
 };
@@ -161,6 +278,26 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return defaultSettings;
   });
 
+  const [cookieConsent, setCookieConsent] = useState<CookieConsentState>(() => {
+    try {
+      const saved = localStorage.getItem(CONSENT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed?.decided === 'boolean' && typeof parsed?.ads === 'boolean') {
+          return {
+            decided: parsed.decided,
+            essential: true,
+            ads: parsed.ads,
+            updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : '',
+          };
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return defaultConsent;
+  });
+
   const [activeTab, setActiveTabState] = useState<'home' | 'games' | 'challenges' | 'leaderboard' | 'profile'>('home');
   const [activeInfoPage, setActiveInfoPage] = useState<InfoPageType>(() =>
     typeof window !== 'undefined' ? getInfoPageFromPath(window.location.pathname) : null
@@ -177,6 +314,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isPremiumOpen, setIsPremiumOpen] = useState(false);
   const [isAdOpen, setIsAdOpen] = useState(false);
   const [isPlayStoreOpen, setIsPlayStoreOpen] = useState(false);
+  const [isCookieModalOpen, setIsCookieModalOpen] = useState(false);
   const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   const exitArmedRef = useRef(false);
@@ -192,6 +330,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isPremiumOpen,
     isAdOpen,
     isPlayStoreOpen,
+    isCookieModalOpen,
   });
 
   latestNavStateRef.current = {
@@ -203,6 +342,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isPremiumOpen,
     isAdOpen,
     isPlayStoreOpen,
+    isCookieModalOpen,
   };
 
   const clearExitArm = () => {
@@ -243,12 +383,13 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const s = latestNavStateRef.current;
 
       // 1. Close any open modal first
-      if (s.isSettingsOpen || s.isPremiumOpen || s.isAdOpen || s.isPlayStoreOpen) {
+      if (s.isSettingsOpen || s.isPremiumOpen || s.isAdOpen || s.isPlayStoreOpen || s.isCookieModalOpen) {
         sound.playClick();
         setIsSettingsOpen(false);
         setIsPremiumOpen(false);
         setIsAdOpen(false);
         setIsPlayStoreOpen(false);
+        setIsCookieModalOpen(false);
         clearExitArm();
         ensureHistoryGuard(s.activeInfoPage ? getPathFromInfoPage(s.activeInfoPage) : '/');
         return;
@@ -349,23 +490,61 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [settings.darkMode]);
 
-  // Sync document language
+  // Sync document language and dynamic SEO title/description/canonical
   useEffect(() => {
     document.documentElement.lang = settings.language;
-  }, [settings.language]);
+    const meta = getSeoMeta(activeInfoPage, settings.language);
+    document.title = meta.title;
 
-  // Enforce AdSense suppression during VIP mode or active gameplay
+    const descEl = document.querySelector('meta[name="description"]');
+    if (descEl) descEl.setAttribute('content', meta.description);
+
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) {
+      canonicalEl.setAttribute('href', `${SITE_CONFIG.siteUrl}${meta.path === '/' ? '/' : meta.path}`);
+    }
+  }, [settings.language, activeInfoPage]);
+
+  // Persist Cookie Consent & sync Google Consent Mode v2 + AdSense pauseAdRequests
   useEffect(() => {
-    const disableAds = profile.isPremium || !!activeGame;
-    document.documentElement.setAttribute('data-ads-disabled', disableAds ? 'true' : 'false');
     try {
-      const win = window as unknown as { adsbygoogle?: { pauseAdRequests?: number } & unknown[] };
-      win.adsbygoogle = win.adsbygoogle || [];
-      win.adsbygoogle.pauseAdRequests = disableAds ? 1 : 0;
+      if (cookieConsent.decided) {
+        localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(cookieConsent));
+      }
     } catch {
       // ignore
     }
-  }, [profile.isPremium, activeGame]);
+
+    const disableAds =
+      profile.isPremium ||
+      !!activeGame ||
+      !cookieConsent.decided ||
+      !cookieConsent.ads ||
+      !SITE_CONFIG.adsenseApproved;
+
+    document.documentElement.setAttribute('data-ads-disabled', disableAds ? 'true' : 'false');
+
+    try {
+      const win = window as unknown as {
+        adsbygoogle?: { pauseAdRequests?: number } & unknown[];
+        gtag?: (...args: unknown[]) => void;
+      };
+      win.adsbygoogle = win.adsbygoogle || [];
+      win.adsbygoogle.pauseAdRequests = disableAds ? 1 : 0;
+
+      if (typeof win.gtag === 'function' && cookieConsent.decided) {
+        const consentValue = cookieConsent.ads ? 'granted' : 'denied';
+        win.gtag('consent', 'update', {
+          ad_storage: consentValue,
+          ad_user_data: consentValue,
+          ad_personalization: consentValue,
+          analytics_storage: 'denied',
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }, [profile.isPremium, activeGame, cookieConsent]);
 
   // Audio settings sync
   useEffect(() => {
@@ -576,11 +755,42 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveResult((prev) => (prev ? { ...prev, xpEarned: prev.xpEarned * 2 } : null));
   };
 
+  const acceptAllCookies = () => {
+    setCookieConsent({
+      decided: true,
+      essential: true,
+      ads: true,
+      updatedAt: new Date().toISOString(),
+    });
+    setIsCookieModalOpen(false);
+  };
+
+  const rejectOptionalCookies = () => {
+    setCookieConsent({
+      decided: true,
+      essential: true,
+      ads: false,
+      updatedAt: new Date().toISOString(),
+    });
+    setIsCookieModalOpen(false);
+  };
+
+  const saveCustomCookieConsent = (allowAds: boolean) => {
+    setCookieConsent({
+      decided: true,
+      essential: true,
+      ads: allowAds,
+      updatedAt: new Date().toISOString(),
+    });
+    setIsCookieModalOpen(false);
+  };
+
   return (
     <MathContext.Provider
       value={{
         profile,
         settings,
+        cookieConsent,
         activeTab,
         activeInfoPage,
         activeGame,
@@ -589,6 +799,7 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPremiumOpen,
         isAdOpen,
         isPlayStoreOpen,
+        isCookieModalOpen,
         showExitPrompt,
         setActiveTab,
         startNewGame,
@@ -611,9 +822,17 @@ export const MathProvider: React.FC<{ children: React.ReactNode }> = ({ children
         openPrivacy: () => navigateInfoPage('privacy'),
         openAbout: () => navigateInfoPage('about'),
         openContact: () => navigateInfoPage('contact'),
+        openTerms: () => navigateInfoPage('terms'),
+        openLegalNotice: () => navigateInfoPage('legal'),
+        openLessons: () => navigateInfoPage('lessons'),
         goHome,
         openAdModal: () => setIsAdOpen(true),
         closeAdModal: () => setIsAdOpen(false),
+        openCookieModal: () => setIsCookieModalOpen(true),
+        closeCookieModal: () => setIsCookieModalOpen(false),
+        acceptAllCookies,
+        rejectOptionalCookies,
+        saveCustomCookieConsent,
         doubleLastGameXp,
         t,
       }}

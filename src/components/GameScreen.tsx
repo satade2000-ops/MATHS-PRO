@@ -22,6 +22,7 @@ import { sound } from '../utils/audio';
 import { generateQuestion } from '../utils/mathGenerator';
 import { OPERATIONS_METADATA } from '../utils/constants';
 import { getDifficultyForStage, getTargetScoreForStage } from '../utils/progression';
+import { MathFormulaText } from './MathFormulaText';
 
 interface FinishSnapshot {
   score: number;
@@ -600,10 +601,9 @@ export const GameScreen: React.FC = () => {
             </div>
 
             {/* The Math Formula */}
-            <div
-              className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-wide text-center font-display my-4 tabular-nums"
-              dangerouslySetInnerHTML={{ __html: currentQuestion.questionText }}
-            />
+            <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-wide text-center font-display my-4 tabular-nums">
+              <MathFormulaText text={currentQuestion.questionText} />
+            </div>
 
             {/* Hint alert */}
             {showHint && currentQuestion.hint && (
@@ -733,10 +733,14 @@ export const GameScreen: React.FC = () => {
                     </button>
                     <button
                       disabled={feedbackState !== 'idle' || Boolean(victorySnapshot)}
-                      onClick={() => handleKeypadPress('-')}
+                      onClick={() =>
+                        handleKeypadPress(
+                          String(currentQuestion.correctAnswer).includes('/') ? '/' : '-'
+                        )
+                      }
                       className="h-12 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 font-mono text-xl font-bold text-slate-700 dark:text-slate-300 active:scale-95 transition-all"
                     >
-                      −
+                      {String(currentQuestion.correctAnswer).includes('/') ? '/' : '−'}
                     </button>
                   </div>
                   <button

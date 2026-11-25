@@ -22,6 +22,10 @@ export const SettingsModal: React.FC = () => {
     openPrivacy,
     openAbout,
     openContact,
+    openTerms,
+    openLegalNotice,
+    openLessons,
+    openCookieModal,
     settings,
     updateSettings,
     resetAllData,
@@ -185,17 +189,17 @@ export const SettingsModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Information pages: Confidentialité, À propos, Contact */}
+          {/* Information pages & Cookie Settings */}
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => {
                 closeSettings();
-                openPrivacy();
+                openLessons();
               }}
               className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
             >
-              <span>🔒</span>
-              <span>{settings.language === 'fr' ? 'Confidentialité' : 'Privacy'}</span>
+              <span>📘</span>
+              <span>{settings.language === 'fr' ? 'Cours' : 'Lessons'}</span>
             </button>
             <button
               onClick={() => {
@@ -217,7 +221,48 @@ export const SettingsModal: React.FC = () => {
               <span>✉️</span>
               <span>Contact</span>
             </button>
+            <button
+              onClick={() => {
+                closeSettings();
+                openPrivacy();
+              }}
+              className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+            >
+              <span>🔒</span>
+              <span>{settings.language === 'fr' ? 'Confidentialité' : 'Privacy'}</span>
+            </button>
+            <button
+              onClick={() => {
+                closeSettings();
+                openTerms();
+              }}
+              className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+            >
+              <span>📄</span>
+              <span>{settings.language === 'fr' ? 'CGU' : 'Terms'}</span>
+            </button>
+            <button
+              onClick={() => {
+                closeSettings();
+                openLegalNotice();
+              }}
+              className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+            >
+              <span>⚖️</span>
+              <span>{settings.language === 'fr' ? 'Légal' : 'Legal'}</span>
+            </button>
           </div>
+
+          <button
+            onClick={() => {
+              closeSettings();
+              openCookieModal();
+            }}
+            className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <span>🍪</span>
+            <span>{settings.language === 'fr' ? 'Gérer mes préférences de cookies' : 'Manage Cookie Preferences'}</span>
+          </button>
 
           {/* Reset All Data */}
           <div className="pt-2">

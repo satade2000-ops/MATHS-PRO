@@ -39,6 +39,10 @@ export const translations = {
     power: 'Puissances',
     fraction: 'Fractions',
     equation: 'Équations',
+    geometry: 'Géométrie',
+    functions: 'Fonctions',
+    statistics: 'Statistiques',
+    probability: 'Probabilités',
 
     // Operation Descriptions
     desc_addition: 'Additions simples à complexes avec retenues',
@@ -51,6 +55,10 @@ export const translations = {
     desc_power: 'Exposants et puissances usuelles',
     desc_fraction: 'Fractions de même dénominateur',
     desc_equation: 'Trouve la valeur inconnue x',
+    desc_geometry: 'Périmètres, aires, angles et Pythagore',
+    desc_functions: 'Images, antécédents et fonctions f(x)',
+    desc_statistics: 'Moyennes, médianes et étendues',
+    desc_probability: 'Chances, issues favorables et probabilités',
 
     // Difficulties
     beginner: 'Débutant',
@@ -111,7 +119,7 @@ export const translations = {
     changeOperation: 'Autre opération',
     backHome: 'Retour à l’accueil',
     reviewQuestions: 'Revoir les calculs de la partie',
-    doubleXpAd: 'Doubler mes XP (+Pub)',
+    doubleXpAd: 'Défi Bonus (+2x XP)',
     stageLabel: 'Partie',
     goalLabel: 'Objectif',
     stageVictoryTitle: 'VICTOIRE !',
@@ -206,6 +214,10 @@ export const translations = {
     power: 'Powers',
     fraction: 'Fractions',
     equation: 'Equations',
+    geometry: 'Geometry',
+    functions: 'Functions',
+    statistics: 'Statistics',
+    probability: 'Probability',
 
     // Operation Descriptions
     desc_addition: 'Simple to multi-digit additions with carries',
@@ -218,6 +230,10 @@ export const translations = {
     desc_power: 'Exponents and standard power calculations',
     desc_fraction: 'Fraction additions with common denominators',
     desc_equation: 'Find the unknown x value',
+    desc_geometry: 'Perimeters, areas, angles, and Pythagoras',
+    desc_functions: 'Inputs, outputs, and functions f(x)',
+    desc_statistics: 'Means, medians, and data ranges',
+    desc_probability: 'Odds, favorable outcomes, and probability',
 
     // Difficulties
     beginner: 'Beginner',
@@ -278,7 +294,7 @@ export const translations = {
     changeOperation: 'Change Operation',
     backHome: 'Back to Home',
     reviewQuestions: 'Review Questions & Explanations',
-    doubleXpAd: 'Double my XP (+Ad)',
+    doubleXpAd: 'Bonus Challenge (+2x XP)',
     stageLabel: 'Stage',
     goalLabel: 'Goal',
     stageVictoryTitle: 'VICTORY!',

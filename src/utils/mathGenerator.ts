@@ -578,5 +578,454 @@ export function generateQuestion(
         };
       }
     }
+
+    case 'geometry': {
+      if (difficulty === 'beginner') {
+        const side = getRandomInt(2, 12);
+        const answer = 4 * side;
+        const distractors = generateDistractors(answer, 3, 6);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Périmètre d’un carré de côté ${side} cm = ? (cm)`,
+          operatorSymbol: '△',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `Le périmètre d’un carré est 4 × côté = 4 × ${side} = ${answer} cm.`,
+            en: `The perimeter of a square is 4 × side = 4 × ${side} = ${answer} cm.`,
+          },
+          hint: {
+            fr: 'Un carré possède 4 côtés égaux.',
+            en: 'A square has 4 equal sides.',
+          },
+        };
+      } else if (difficulty === 'easy') {
+        const l = getRandomInt(4, 15);
+        const w = getRandomInt(2, l);
+        const answer = l * w;
+        const distractors = generateDistractors(answer, 3, 10);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Aire d’un rectangle (${l} × ${w} cm) = ? (cm²)`,
+          operatorSymbol: '△',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `Aire du rectangle = Longueur × largeur = ${l} × ${w} = ${answer} cm².`,
+            en: `Rectangle area = length × width = ${l} × ${w} = ${answer} cm².`,
+          },
+          hint: {
+            fr: 'Multipliez la longueur par la largeur.',
+            en: 'Multiply length by width.',
+          },
+        };
+      } else if (difficulty === 'medium') {
+        const angle1 = getRandomInt(35, 80);
+        const angle2 = getRandomInt(25, 130 - angle1);
+        const answer = 180 - angle1 - angle2;
+        const distractors = generateDistractors(answer, 3, 12);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Triangle : angles ${angle1}° et ${angle2}°. 3ᵉ angle = ? (°)`,
+          operatorSymbol: '△',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `La somme des angles d’un triangle vaut toujours 180° : 180 − (${angle1} + ${angle2}) = ${answer}°.`,
+            en: `Triangle angles always sum to 180°: 180 − (${angle1} + ${angle2}) = ${answer}°.`,
+          },
+          hint: {
+            fr: 'La somme des 3 angles d’un triangle fait 180°.',
+            en: 'The 3 angles of a triangle add up to 180°.',
+          },
+        };
+      } else if (difficulty === 'hard') {
+        const base = getRandomInt(4, 14) * 2;
+        const height = getRandomInt(3, 14);
+        const answer = (base * height) / 2;
+        const distractors = generateDistractors(answer, 3, 12);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Aire d’un triangle (base ${base}, hauteur ${height}) = ?`,
+          operatorSymbol: '△',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `Aire du triangle = (base × hauteur) ÷ 2 = (${base} × ${height}) ÷ 2 = ${answer}.`,
+            en: `Triangle area = (base × height) ÷ 2 = (${base} × ${height}) ÷ 2 = ${answer}.`,
+          },
+          hint: {
+            fr: 'N’oubliez pas de diviser par 2 après base × hauteur !',
+            en: 'Remember to divide by 2 after base × height!',
+          },
+        };
+      } else {
+        const triples = [
+          [3, 4, 5],
+          [6, 8, 10],
+          [5, 12, 13],
+          [9, 12, 15],
+          [8, 15, 17],
+        ];
+        const [a, b, c] = triples[getRandomInt(0, triples.length - 1)];
+        const answer = c;
+        const distractors = generateDistractors(answer, 3, 5);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Triangle rectangle (${a} et ${b}) : hypoténuse = ?`,
+          operatorSymbol: '△',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `Théorème de Pythagore : c² = ${a}² + ${b}² = ${a * a} + ${b * b} = ${c * c}, donc c = √${c * c} = ${c}.`,
+            en: `Pythagorean theorem: c² = ${a}² + ${b}² = ${a * a} + ${b * b} = ${c * c}, so c = √${c * c} = ${c}.`,
+          },
+          hint: {
+            fr: 'Utilisez Pythagore : a² + b² = c².',
+            en: 'Use Pythagoras: a² + b² = c².',
+          },
+        };
+      }
+    }
+
+    case 'functions': {
+      if (difficulty === 'beginner') {
+        const k = getRandomInt(2, 9);
+        const x = getRandomInt(1, 10);
+        const answer = k * x;
+        const distractors = generateDistractors(answer, 3, 8);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `f(x) = ${k}x  ⟹  f(${x}) = ?`,
+          operatorSymbol: 'f',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `On remplace x par ${x} : f(${x}) = ${k} × ${x} = ${answer}.`,
+            en: `Substitute x = ${x}: f(${x}) = ${k} × ${x} = ${answer}.`,
+          },
+          hint: {
+            fr: `Remplacez x par ${x} dans l’expression.`,
+            en: `Plug x = ${x} into the formula.`,
+          },
+        };
+      } else if (difficulty === 'easy') {
+        const a = getRandomInt(2, 6);
+        const b = getRandomInt(1, 12);
+        const x = getRandomInt(1, 9);
+        const answer = a * x + b;
+        const distractors = generateDistractors(answer, 3, 8);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `f(x) = ${a}x + ${b}  ⟹  f(${x}) = ?`,
+          operatorSymbol: 'f',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `f(${x}) = ${a} × ${x} + ${b} = ${a * x} + ${b} = ${answer}.`,
+            en: `f(${x}) = ${a} × ${x} + ${b} = ${a * x} + ${b} = ${answer}.`,
+          },
+        };
+      } else if (difficulty === 'medium') {
+        const a = getRandomInt(2, 8);
+        const b = getRandomInt(3, 15);
+        const x = getRandomInt(2, 10);
+        const answer = a * x - b;
+        const distractors = generateDistractors(answer, 3, 10);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `f(x) = ${a}x − ${b}  ⟹  f(${x}) = ?`,
+          operatorSymbol: 'f',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `f(${x}) = ${a} × ${x} − ${b} = ${a * x} − ${b} = ${answer}.`,
+            en: `f(${x}) = ${a} × ${x} − ${b} = ${a * x} − ${b} = ${answer}.`,
+          },
+        };
+      } else if (difficulty === 'hard') {
+        const c = getRandomInt(1, 15);
+        const x = getRandomInt(2, 9);
+        const answer = x * x + c;
+        const distractors = generateDistractors(answer, 3, 12);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `g(x) = x<sup>2</sup> + ${c}  ⟹  g(${x}) = ?`,
+          operatorSymbol: 'f',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `g(${x}) = ${x}² + ${c} = ${x * x} + ${c} = ${answer}.`,
+            en: `g(${x}) = ${x}² + ${c} = ${x * x} + ${c} = ${answer}.`,
+          },
+          hint: {
+            fr: `Calculez d’abord ${x}², puis ajoutez ${c}.`,
+            en: `Compute ${x}² first, then add ${c}.`,
+          },
+        };
+      } else {
+        // Antecedent of affine function
+        const a = getRandomInt(2, 7 + extraStage);
+        const b = getRandomInt(2, 15);
+        const xVal = getRandomInt(2, 12 + extraStage);
+        const y = a * xVal + b;
+        const distractors = generateDistractors(xVal, 3, 5);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `f(x) = ${a}x + ${b}, f(x) = ${y}  ⟹  x = ?`,
+          operatorSymbol: 'f',
+          correctAnswer: xVal,
+          options: shuffleArray([xVal, ...distractors]),
+          explanation: {
+            fr: `On résout ${a}x + ${b} = ${y} : ${a}x = ${y - b}, donc l’antécédent vaut x = ${xVal}.`,
+            en: `Solve ${a}x + ${b} = ${y}: ${a}x = ${y - b}, so x = ${xVal}.`,
+          },
+        };
+      }
+    }
+
+    case 'statistics': {
+      if (difficulty === 'beginner' || difficulty === 'easy') {
+        const count = difficulty === 'beginner' ? 3 : 4;
+        const mean = getRandomInt(4, difficulty === 'beginner' ? 12 : 20);
+        const nums: number[] = [];
+        let running = 0;
+        for (let i = 0; i < count - 1; i++) {
+          const val = getRandomInt(Math.max(1, mean - 5), mean + 5);
+          nums.push(val);
+          running += val;
+        }
+        const last = mean * count - running;
+        if (last >= 0) {
+          nums.push(last);
+        } else {
+          // Safe fallback guaranteed positive
+          const a = mean - 2;
+          const b = mean;
+          const c = mean + 2;
+          const fallbackMean = mean;
+          const distractors = generateDistractors(fallbackMean, 3, 5);
+          return {
+            id,
+            operation,
+            difficulty,
+            questionText: `Moyenne de [${a}, ${b}, ${c}] = ?`,
+            operatorSymbol: 'μ',
+            correctAnswer: fallbackMean,
+            options: shuffleArray([fallbackMean, ...distractors]),
+            explanation: {
+              fr: `Moyenne = (${a} + ${b} + ${c}) ÷ 3 = ${a + b + c} ÷ 3 = ${fallbackMean}.`,
+              en: `Mean = (${a} + ${b} + ${c}) ÷ 3 = ${a + b + c} ÷ 3 = ${fallbackMean}.`,
+            },
+          };
+        }
+        const sum = nums.reduce((acc, v) => acc + v, 0);
+        const distractors = generateDistractors(mean, 3, 6);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Moyenne de [${nums.join(', ')}] = ?`,
+          operatorSymbol: 'μ',
+          correctAnswer: mean,
+          options: shuffleArray([mean, ...distractors]),
+          explanation: {
+            fr: `On additionne toutes les valeurs (${sum}) puis on divise par l’effectif (${count}) : ${sum} ÷ ${count} = ${mean}.`,
+            en: `Sum all values (${sum}) and divide by count (${count}): ${sum} ÷ ${count} = ${mean}.`,
+          },
+          hint: {
+            fr: 'Moyenne = somme des valeurs ÷ nombre de valeurs.',
+            en: 'Mean = sum of values ÷ number of values.',
+          },
+        };
+      } else if (difficulty === 'medium') {
+        const sorted = [
+          getRandomInt(2, 8),
+          getRandomInt(9, 14),
+          getRandomInt(15, 22),
+          getRandomInt(23, 30),
+          getRandomInt(31, 40),
+        ];
+        const answer = sorted[2];
+        const distractors = generateDistractors(answer, 3, 6);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Médiane de [${sorted.join(', ')}] = ?`,
+          operatorSymbol: 'Me',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `La série est ordonnée et compte 5 valeurs : la valeur centrale (3ᵉ position) est ${answer}.`,
+            en: `The ordered list has 5 values: the middle value (3rd position) is ${answer}.`,
+          },
+          hint: {
+            fr: 'Trouvez la valeur exactement au milieu de la série ordonnée.',
+            en: 'Find the exact middle value of the sorted list.',
+          },
+        };
+      } else if (difficulty === 'hard') {
+        const minVal = getRandomInt(4, 15);
+        const maxVal = getRandomInt(minVal + 12, minVal + 45);
+        const mid1 = getRandomInt(minVal + 2, maxVal - 4);
+        const mid2 = getRandomInt(minVal + 3, maxVal - 2);
+        const series = shuffleArray([minVal, mid1, mid2, maxVal]);
+        const answer = maxVal - minVal;
+        const distractors = generateDistractors(answer, 3, 8);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Étendue de [${series.join(', ')}] = ?`,
+          operatorSymbol: 'E',
+          correctAnswer: answer,
+          options: shuffleArray([answer, ...distractors]),
+          explanation: {
+            fr: `Étendue = Valeur maximale − Valeur minimale = ${maxVal} − ${minVal} = ${answer}.`,
+            en: `Range = Max − Min = ${maxVal} − ${minVal} = ${answer}.`,
+          },
+          hint: {
+            fr: 'Soustrayez la plus petite valeur à la plus grande.',
+            en: 'Subtract the smallest value from the largest.',
+          },
+        };
+      } else {
+        const base = getRandomInt(10, 22);
+        const v1 = base - 4;
+        const v2 = base - 2;
+        const v3 = base;
+        const v4 = base + 2;
+        const v5 = base + 4 + extraStage * 5;
+        const sum = v1 + v2 + v3 + v4 + v5;
+        const exactMean = Math.round(sum / 5);
+        const adjustedV5 = exactMean * 5 - (v1 + v2 + v3 + v4);
+        const list = [v1, v2, v3, v4, adjustedV5];
+        const total = list.reduce((a, b) => a + b, 0);
+        const distractors = generateDistractors(exactMean, 3, 6);
+        return {
+          id,
+          operation,
+          difficulty,
+          questionText: `Moyenne de [${list.join(', ')}] = ?`,
+          operatorSymbol: 'μ',
+          correctAnswer: exactMean,
+          options: shuffleArray([exactMean, ...distractors]),
+          explanation: {
+            fr: `Moyenne = ${total} ÷ 5 = ${exactMean}.`,
+            en: `Mean = ${total} ÷ 5 = ${exactMean}.`,
+          },
+        };
+      }
+    }
+
+    case 'probability': {
+      const scenarios: {
+        difficulty: DifficultyLevel[];
+        q: string;
+        ans: string;
+        wrongs: string[];
+        frExp: string;
+        enExp: string;
+      }[] = [
+        {
+          difficulty: ['beginner', 'easy'],
+          q: 'Pièce équilibrée : P(Pile) = ?',
+          ans: '1/2',
+          wrongs: ['1/4', '1/3', '2/3'],
+          frExp: 'Il y a 1 face Pile sur 2 faces possibles : P = 1/2.',
+          enExp: 'There is 1 favorable side out of 2 possible outcomes: P = 1/2.',
+        },
+        {
+          difficulty: ['beginner', 'easy'],
+          q: 'Dé à 6 faces : P(obtenir 4) = ?',
+          ans: '1/6',
+          wrongs: ['1/3', '1/4', '2/6'],
+          frExp: 'Un seul 4 sur 6 faces équiprobables : P = 1/6.',
+          enExp: 'Only one 4 out of 6 equal faces: P = 1/6.',
+        },
+        {
+          difficulty: ['easy', 'medium'],
+          q: 'Dé à 6 faces : P(nombre pair) = ?',
+          ans: '1/2',
+          wrongs: ['1/6', '1/3', '2/3'],
+          frExp: 'Les nombres pairs sont {2, 4, 6}, soit 3 chances sur 6 = 3/6 = 1/2.',
+          enExp: 'Even numbers are {2, 4, 6}, so 3 out of 6 = 3/6 = 1/2.',
+        },
+        {
+          difficulty: ['medium', 'hard'],
+          q: 'Urne : 3 boules rouges, 7 bleues. P(rouge) = ?',
+          ans: '3/10',
+          wrongs: ['3/7', '7/10', '1/3'],
+          frExp: 'Total = 3 + 7 = 10 boules. Il y a 3 boules rouges : P = 3/10.',
+          enExp: 'Total = 3 + 7 = 10 balls. 3 are red: P = 3/10.',
+        },
+        {
+          difficulty: ['medium', 'hard'],
+          q: 'Dé à 6 faces : P(obtenir > 4) = ?',
+          ans: '1/3',
+          wrongs: ['1/6', '1/2', '2/3'],
+          frExp: 'Les faces > 4 sont {5, 6}, soit 2/6 = 1/3.',
+          enExp: 'Faces > 4 are {5, 6}, which is 2/6 = 1/3.',
+        },
+        {
+          difficulty: ['hard', 'expert'],
+          q: 'Si P(A) = 2/5, alors P(contraire de A) = ?',
+          ans: '3/5',
+          wrongs: ['2/5', '1/5', '4/5'],
+          frExp: 'L’événement contraire vaut 1 − P(A) = 5/5 − 2/5 = 3/5.',
+          enExp: 'The complementary event is 1 − P(A) = 5/5 − 2/5 = 3/5.',
+        },
+        {
+          difficulty: ['expert'],
+          q: 'Deux lancers de pièce : P(2 fois Pile) = ?',
+          ans: '1/4',
+          wrongs: ['1/2', '1/3', '3/4'],
+          frExp: 'Issues : (P,P), (P,F), (F,P), (F,F). Une seule donne 2 fois Pile : P = 1/4.',
+          enExp: 'Outcomes: (H,H), (H,T), (T,H), (T,T). Only 1 has two Heads: P = 1/4.',
+        },
+      ];
+
+      const pool = scenarios.filter((s) => s.difficulty.includes(difficulty));
+      const picked = pool[getRandomInt(0, pool.length - 1)] || scenarios[0];
+
+      return {
+        id,
+        operation,
+        difficulty,
+        questionText: picked.q,
+        operatorSymbol: 'P',
+        correctAnswer: picked.ans,
+        options: shuffleArray([picked.ans, ...picked.wrongs]),
+        explanation: {
+          fr: picked.frExp,
+          en: picked.enExp,
+        },
+        hint: {
+          fr: 'Probabilité = nombre de cas favorables ÷ nombre total de cas possibles.',
+          en: 'Probability = favorable outcomes ÷ total possible outcomes.',
+        },
+      };
+    }
   }
 }

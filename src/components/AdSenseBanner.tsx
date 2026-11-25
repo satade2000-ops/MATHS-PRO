@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useMathApp } from '../context/MathContext';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 export interface AdsByGoogleQueue extends Array<Record<string, unknown>> {
   pauseAdRequests?: number;
@@ -8,6 +9,7 @@ export interface AdsByGoogleQueue extends Array<Record<string, unknown>> {
 declare global {
   interface Window {
     adsbygoogle?: AdsByGoogleQueue;
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
@@ -17,14 +19,12 @@ interface AdSenseBannerProps {
   className?: string;
 }
 
-const ADSENSE_CLIENT_ID = 'ca-pub-4256744845246337';
-
 export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   placement = 'home',
   slotId,
   className = '',
 }) => {
-  const { profile, activeGame, settings } = useMathApp();
+  const { profile, activeGame, settings, cookieConsent } = useMathApp();
   const insRef = useRef<HTMLModElement | null>(null);
 
   const envSlot =
@@ -36,9 +36,18 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   const resolvedSlot = typeof rawSlot === 'string' ? rawSlot.trim() : '';
   const hasValidSlot = /^\d+$/.test(resolvedSlot);
 
-  // Strictly disable ads for VIP users, during active gameplay, or when no manual slot is configured
-  // (When no manual slot ID is set, Google AdSense Auto Ads from index.html manages placements without TagError.)
-  const shouldRenderManualUnit = !profile.isPremium && !activeGame && hasValidSlot;
+  // Strictly gate manual ad units:
+  // 1) AdSense approval must be enabled (VITE_ADSENSE_APPROVED=true)
+  // 2) User must have explicitly consented to advertising cookies
+  // 3) Disabled for VIP users and during active gameplay
+  // 4) Valid numeric AdSense slot ID required
+  const shouldRenderManualUnit =
+    SITE_CONFIG.adsenseApproved &&
+    cookieConsent.decided &&
+    cookieConsent.ads &&
+    !profile.isPremium &&
+    !activeGame &&
+    hasValidSlot;
 
   useEffect(() => {
     if (!shouldRenderManualUnit || !insRef.current) return;
@@ -71,7 +80,7 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
           ref={insRef}
           className="adsbygoogle block w-full"
           style={{ display: 'block' }}
-          data-ad-client={ADSENSE_CLIENT_ID}
+          data-ad-client={SITE_CONFIG.adsensePublisherId}
           data-ad-slot={resolvedSlot}
           data-ad-format="auto"
           data-full-width-responsive="true"

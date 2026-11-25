@@ -17,7 +17,7 @@ import { MascotEuler } from './MascotEuler';
 import { sound } from '../utils/audio';
 
 export const AboutPage: React.FC = () => {
-  const { settings, goHome, setActiveTab } = useMathApp();
+  const { settings, goHome, setActiveTab, openLessons } = useMathApp();
   const isFr = settings.language === 'fr';
 
   const handleBackHome = () => {
@@ -230,24 +230,24 @@ export const AboutPage: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {isFr
-                ? '10 disciplines interactives, 5 modes de jeu et 5 niveaux de progression'
-                : '10 interactive math modules, 5 game modes, and 5 difficulty levels'}
+                ? '14 disciplines interactives, 8 chapitres de cours, 5 modes de jeu et 5 niveaux'
+                : '14 interactive math modules, 8 study chapters, 5 game modes, and 5 difficulty levels'}
             </p>
           </div>
           <div className="font-mono font-black text-sm px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 shrink-0">
-            10 × 5 × 5
+            14 × 5 × 5
           </div>
         </div>
 
-        {/* 10 Math Symbol Tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        {/* 14 Math Symbol Tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {OPERATIONS_METADATA.map((op) => (
             <div
               key={op.type}
               className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 flex items-center sm:flex-col sm:text-center gap-2.5 sm:gap-1.5"
             >
               <div
-                className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${op.gradient} text-white flex items-center justify-center font-black text-lg shadow-xs shrink-0`}
+                className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${op.gradient} text-white flex items-center justify-center font-black text-base shadow-xs shrink-0`}
               >
                 {op.symbol}
               </div>
@@ -264,6 +264,10 @@ export const AboutPage: React.FC = () => {
                       power: 'Puissances',
                       fraction: 'Fractions',
                       equation: 'Équations',
+                      geometry: 'Géométrie',
+                      functions: 'Fonctions',
+                      statistics: 'Statistiques',
+                      probability: 'Probabilités',
                     }[op.type]
                   : {
                       addition: 'Addition',
@@ -276,6 +280,10 @@ export const AboutPage: React.FC = () => {
                       power: 'Powers',
                       fraction: 'Fractions',
                       equation: 'Equations',
+                      geometry: 'Geometry',
+                      functions: 'Functions',
+                      statistics: 'Statistics',
+                      probability: 'Probability',
                     }[op.type]}
               </span>
             </div>
@@ -285,7 +293,7 @@ export const AboutPage: React.FC = () => {
         {/* Key Numbers Strip */}
         <div className="grid grid-cols-3 gap-2.5 pt-1">
           <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 text-center">
-            <div className="text-xl font-black font-mono text-indigo-600 dark:text-indigo-400">10</div>
+            <div className="text-xl font-black font-mono text-indigo-600 dark:text-indigo-400">14</div>
             <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
               {isFr ? 'Modules maths' : 'Math modules'}
             </div>
@@ -307,6 +315,17 @@ export const AboutPage: React.FC = () => {
 
       {/* Bottom Action Buttons */}
       <div className="flex flex-wrap items-center gap-2.5">
+        <button
+          onClick={() => {
+            sound.playClick();
+            openLessons();
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm active:scale-95 transition-all"
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>{isFr ? 'Cours & Fiches' : 'Lessons'}</span>
+        </button>
+
         <button
           onClick={() => {
             sound.playClick();

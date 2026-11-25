@@ -32,7 +32,10 @@ export const LeaderboardTab: React.FC = () => {
           {t('leaderboardTitle')}
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          {t('leaderboardSubtitle')}
+          {t('leaderboardSubtitle')} ·{' '}
+          <span className="text-slate-400 dark:text-slate-500">
+            (Classement local avec profils de référence)
+          </span>
         </p>
       </div>
 

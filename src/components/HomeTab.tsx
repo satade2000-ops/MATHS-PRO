@@ -8,6 +8,7 @@ import {
   Award,
   ChevronRight,
   Zap,
+  BookOpen,
 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
@@ -25,9 +26,11 @@ export const HomeTab: React.FC = () => {
     claimDailyReward,
     setActiveTab,
     openPlayStore,
+    openLessons,
     t,
   } = useMathApp();
 
+  const isFr = settings.language === 'fr';
   const mainOperations = OPERATIONS_METADATA.filter((op) => op.isMain);
   const otherOperations = OPERATIONS_METADATA.filter((op) => !op.isMain);
 
@@ -124,6 +127,36 @@ export const HomeTab: React.FC = () => {
           }`}
         >
           {profile.dailyRewardClaimed ? '✓ Récupéré' : t('dailyRewardClaim')}
+        </button>
+      </div>
+
+      {/* Educational Hub Banner: Cours & Fiches Méthode */}
+      <div className="rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 dark:from-emerald-950/35 dark:via-teal-950/30 dark:to-indigo-950/35 border border-emerald-300/60 dark:border-emerald-800/60 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-xs">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-slate-900 dark:text-white font-display">
+              {isFr ? 'Cours & Fiches Méthode (8 chapitres)' : 'Math Lessons & Study Guides (8 chapters)'}
+            </h2>
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
+              {isFr
+                ? 'Arithmétique, Algèbre, Géométrie, Fractions, Équations, Fonctions, Statistiques et Probabilités avec formules et exemples corrigés.'
+                : 'Arithmetic, Algebra, Geometry, Fractions, Equations, Functions, Statistics, and Probability with formulas and worked examples.'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            sound.playClick();
+            openLessons();
+          }}
+          className="px-4 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold whitespace-nowrap shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <BookOpen className="w-3.5 h-3.5" />
+          <span>{isFr ? 'Lire les cours' : 'Open Lessons'}</span>
         </button>
       </div>
 

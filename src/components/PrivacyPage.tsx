@@ -20,7 +20,7 @@ import { SITE_CONFIG } from '../config/siteConfig';
 import { sound } from '../utils/audio';
 
 export const PrivacyPage: React.FC = () => {
-  const { settings, goHome, openContact, openSettings } = useMathApp();
+  const { settings, goHome, openContact, openSettings, openCookieModal } = useMathApp();
   const isFr = settings.language === 'fr';
 
   const handleBackHome = () => {
@@ -185,9 +185,20 @@ export const PrivacyPage: React.FC = () => {
             </p>
             <p>
               {isFr
-                ? "Des services tiers intégrés pour le financement gratuit de l'application (notamment Google AdSense) peuvent toutefois déposer ou lire des cookies techniques et publicitaires dans votre navigateur conformément à leurs propres politiques."
-                : 'Third-party services integrated to support the free version (specifically Google AdSense) may set or read technical and advertising cookies in your browser under their own privacy policies.'}
+                ? "Des services tiers intégrés pour le financement gratuit de l'application (notamment Google AdSense) peuvent déposer ou lire des cookies publicitaires uniquement après votre consentement explicite via la bannière de gestion des cookies (Google Consent Mode v2). Par défaut, avant votre choix ou en cas de refus, les requêtes publicitaires restent bloquées."
+                : 'Third-party services integrated to support the free version (specifically Google AdSense) may set or read advertising cookies only after your explicit consent via the Cookie Consent Manager (Google Consent Mode v2). By default, before your choice or if declined, ad requests remain paused.'}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                openCookieModal();
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 min-h-[40px] rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-xs font-bold transition-colors"
+            >
+              <Cookie className="w-3.5 h-3.5" />
+              <span>{isFr ? 'Gérer mes préférences de cookies' : 'Manage Cookie Preferences'}</span>
+            </button>
           </div>
         </section>
 

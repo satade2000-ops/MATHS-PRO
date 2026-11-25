@@ -4,11 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MATHS PRO – Jeux de Mathématiques</title>
-    <meta name="description" content="Application mobile de jeux mathématiques : addition, soustraction, multiplication, division, calcul mental, pourcentages, fractions, racines carrées et modes de défis interactifs." />
+    <meta name="description" content="Plateforme éducative de mathématiques : cours, fiches méthode et jeux interactifs (arithmétique, algèbre, géométrie, fractions, équations, fonctions, statistiques et probabilités)." />
+    <link rel="canonical" href="https://maths-pro-pied.vercel.app/" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- OpenGraph -->
     <meta property="og:title" content="MATHS PRO – Jeux de Mathématiques" />
-    <meta property="og:description" content="Application mobile de jeux mathématiques : addition, soustraction, multiplication, division, calcul mental, pourcentages, fractions, racines carrées et modes de défis interactifs." />
+    <meta property="og:description" content="Plateforme éducative de mathématiques : cours, fiches méthode et jeux interactifs (arithmétique, algèbre, géométrie, fractions, équations, fonctions, statistiques et probabilités)." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://maths-pro-pied.vercel.app/" />
+    <meta property="og:site_name" content="MATHS PRO" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:image" content="https://maths-pro-pied.vercel.app/pwa-512x512.png" />
+    <meta property="og:image:alt" content="Icône et aperçu de l'application éducative MATHS PRO" />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MATHS PRO – Jeux de Mathématiques" />
+    <meta name="twitter:description" content="Cours de maths, fiches méthode et jeux interactifs : arithmétique, algèbre, géométrie, fractions, équations, fonctions, statistiques et probabilités." />
+    <meta name="twitter:image" content="https://maths-pro-pied.vercel.app/pwa-512x512.png" />
+
+    <!-- PWA & Mobile -->
     <meta name="theme-color" content="#4F46E5" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -19,14 +35,50 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MATHS PRO – Jeux de Mathématiques",
+        "url": "https://maths-pro-pied.vercel.app/",
+        "description": "Plateforme éducative interactive de mathématiques proposant des cours, fiches méthode et exercices corrigés en arithmétique, algèbre, géométrie, fractions, équations, fonctions, statistiques et probabilités.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "inLanguage": ["fr", "en"],
+        "isAccessibleForFree": true
+      }
+    </script>
+
+    <!-- Google AdSense Ownership & Consent Mode v2 Defaults (Ads paused until consent & approval) -->
     <meta name="google-adsense-account" content="ca-pub-4256744845246337" />
     <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500
+      });
       try {
+        window.adsbygoogle = window.adsbygoogle || [];
+        window.adsbygoogle.pauseAdRequests = 1;
+        var savedConsent = JSON.parse(localStorage.getItem('maths_pro_consent_v1') || '{}');
+        if (savedConsent && savedConsent.decided && savedConsent.ads) {
+          gtag('consent', 'update', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted',
+            analytics_storage: 'denied'
+          });
+        }
         var savedProfile = JSON.parse(localStorage.getItem('maths_pro_profile_v2') || '{}');
         if (savedProfile && savedProfile.isPremium) {
           document.documentElement.setAttribute('data-ads-disabled', 'true');
-          window.adsbygoogle = window.adsbygoogle || [];
-          window.adsbygoogle.pauseAdRequests = 1;
         }
       } catch (e) {}
     </script>
@@ -45,4 +97,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

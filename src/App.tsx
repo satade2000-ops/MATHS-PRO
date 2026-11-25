@@ -15,6 +15,10 @@ import { PlayStoreModal } from './components/PlayStoreModal';
 import { PrivacyPage } from './components/PrivacyPage';
 import { AboutPage } from './components/AboutPage';
 import { ContactPage } from './components/ContactPage';
+import { TermsPage } from './components/TermsPage';
+import { LegalNoticePage } from './components/LegalNoticePage';
+import { LessonsPage } from './components/LessonsPage';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { AppFooter } from './components/AppFooter';
 
 const MainAppContent: React.FC = () => {
@@ -44,6 +48,12 @@ const MainAppContent: React.FC = () => {
             <AboutPage />
           ) : activeInfoPage === 'contact' ? (
             <ContactPage />
+          ) : activeInfoPage === 'terms' ? (
+            <TermsPage />
+          ) : activeInfoPage === 'legal' ? (
+            <LegalNoticePage />
+          ) : activeInfoPage === 'lessons' ? (
+            <LessonsPage />
           ) : (
             <>
               {activeTab === 'home' && <HomeTab />}
@@ -57,6 +67,9 @@ const MainAppContent: React.FC = () => {
 
         {/* Global Accessible Footer */}
         <AppFooter />
+
+        {/* Cookie Consent CMP Banner & Modal */}
+        <CookieConsentBanner />
 
         {/* Double-Back to Exit Toast */}
         {showExitPrompt && (

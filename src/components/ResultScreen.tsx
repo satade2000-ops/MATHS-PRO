@@ -20,6 +20,7 @@ import { sound } from '../utils/audio';
 import { OPERATIONS_METADATA } from '../utils/constants';
 import { getDifficultyForStage, getTargetScoreForStage } from '../utils/progression';
 import { AdSenseBanner } from './AdSenseBanner';
+import { MathFormulaText } from './MathFormulaText';
 
 export const ResultScreen: React.FC = () => {
   const {
@@ -281,10 +282,9 @@ export const ResultScreen: React.FC = () => {
                   {activeResult.historyRecords.map((item, idx) => (
                     <div key={idx} className="pt-2 first:pt-0">
                       <div className="flex items-center justify-between font-bold">
-                        <span
-                          className="font-mono text-slate-900 dark:text-slate-100"
-                          dangerouslySetInnerHTML={{ __html: item.question.questionText }}
-                        />
+                        <span className="font-mono text-slate-900 dark:text-slate-100">
+                          <MathFormulaText text={item.question.questionText} />
+                        </span>
                         <span
                           className={`font-semibold flex items-center gap-1 ${
                             item.isCorrect ? 'text-emerald-600' : 'text-rose-600'
