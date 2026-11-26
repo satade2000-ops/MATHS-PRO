@@ -36,12 +36,18 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   const resolvedSlot = typeof rawSlot === 'string' ? rawSlot.trim() : '';
   const hasValidSlot = /^\d+$/.test(resolvedSlot);
 
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
   // Strictly gate manual ad units:
-  // 1) AdSense approval must be enabled (VITE_ADSENSE_APPROVED=true)
-  // 2) User must have explicitly consented to advertising cookies
-  // 3) Disabled for VIP users and during active gameplay
-  // 4) Valid numeric AdSense slot ID required
+  // 1) Not on localhost
+  // 2) AdSense approval must be enabled (VITE_ADSENSE_APPROVED=true)
+  // 3) User must have explicitly consented to advertising cookies
+  // 4) Disabled for VIP users and during active gameplay
+  // 5) Valid numeric AdSense slot ID required
   const shouldRenderManualUnit =
+    !isLocalhost &&
     SITE_CONFIG.adsenseApproved &&
     cookieConsent.decided &&
     cookieConsent.ads &&

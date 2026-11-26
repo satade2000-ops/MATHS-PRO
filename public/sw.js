@@ -11,7 +11,7 @@ const ASSETS_TO_CACHE = [
   '/apple-touch-icon.png',
 ];
 
-const BYPASS_PATHS = ['/ads.txt', '/robots.txt', '/sitemap.xml'];
+const BYPASS_PATHS = ['/ads.txt', '/app-ads.txt', '/.well-known/assetlinks.json', '/robots.txt', '/sitemap.xml'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

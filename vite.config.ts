@@ -50,6 +50,8 @@ export default defineConfig(() => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
           navigateFallbackDenylist: [
             /^\/ads\.txt$/,
+            /^\/app-ads\.txt$/,
+            /^\/\.well-known\//,
             /^\/robots\.txt$/,
             /^\/sitemap\.xml$/,
             /^\/manifest\.json$/,
