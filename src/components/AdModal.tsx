@@ -37,7 +37,7 @@ export const AdModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="relative w-full max-w-sm bg-slate-900 rounded-3xl p-6 text-white shadow-2xl border border-slate-700 animate-fadeIn text-center">
         {/* Header Indicator */}
         <div className="flex items-center justify-between mb-4 text-xs text-slate-400">

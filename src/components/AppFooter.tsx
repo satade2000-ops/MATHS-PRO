@@ -10,10 +10,14 @@ import {
 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
+import { shouldDisplayBottomAdBanner } from '../config/adConfig';
 
 export const AppFooter: React.FC = () => {
   const {
     settings,
+    profile,
+    activeGame,
+    cookieConsent,
     activeInfoPage,
     openLessons,
     openPrivacy,
@@ -24,6 +28,12 @@ export const AppFooter: React.FC = () => {
     openCookieModal,
   } = useMathApp();
   const isFr = settings.language === 'fr';
+  const isBottomBannerVisible = shouldDisplayBottomAdBanner({
+    isPremium: profile.isPremium,
+    hasActiveGame: Boolean(activeGame),
+    consentDecided: cookieConsent.decided,
+    consentAds: cookieConsent.ads,
+  });
 
   const handleNav = (fn: () => void) => {
     sound.playClick();
@@ -76,7 +86,11 @@ export const AppFooter: React.FC = () => {
   ];
 
   return (
-    <footer className="mt-6 pt-5 pb-24 px-4 sm:px-6 border-t border-slate-200/80 dark:border-slate-800/80">
+    <footer
+      className={`mt-6 pt-5 px-4 sm:px-6 border-t border-slate-200/80 dark:border-slate-800/80 ${
+        isBottomBannerVisible ? 'pb-36' : 'pb-24'
+      }`}
+    >
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex items-center gap-2 text-xs font-extrabold tracking-tight text-slate-700 dark:text-slate-200 font-display">
           <span>MATHS PRO</span>

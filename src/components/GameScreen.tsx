@@ -15,8 +15,10 @@ import {
   Trophy,
   Star,
   Target,
+  Tv,
 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
+import { useInterstitial } from '../hooks/useInterstitial';
 import { MathQuestion, QuestionAnswerRecord } from '../types/math';
 import { sound } from '../utils/audio';
 import { generateQuestion } from '../utils/mathGenerator';
@@ -67,13 +69,24 @@ export const GameScreen: React.FC = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
-  // Victory Celebration Overlay state
+  // Victory Celebration Overlay & Out-of-Lives Game Over state
   const [victorySnapshot, setVictorySnapshot] = useState<FinishSnapshot | null>(null);
+  const [isOutOfLives, setIsOutOfLives] = useState(false);
+
+  // Interstitial Ad hook (every 3 consecutive correct answers)
+  const {
+    showInterstitial,
+    isInterstitialVisible,
+    countdown: interstitialCountdown,
+    dismissInterstitial,
+    interstitialUnitId,
+  } = useInterstitial();
 
   // Live refs to prevent stale closures inside timers
   const scoreRef = useRef(0);
   const correctRef = useRef(0);
   const incorrectRef = useRef(0);
+  const consecutiveCorrectRef = useRef(0);
   const livesRef = useRef(3);
   const hasFinishedRef = useRef(false);
   const advanceTimerRef = useRef<number | null>(null);
@@ -105,6 +118,7 @@ export const GameScreen: React.FC = () => {
     scoreRef.current = 0;
     correctRef.current = 0;
     incorrectRef.current = 0;
+    consecutiveCorrectRef.current = 0;
     livesRef.current = 3;
     hasFinishedRef.current = false;
     historyRecordsRef.current = [];
@@ -119,6 +133,7 @@ export const GameScreen: React.FC = () => {
     setQuestionIndex(1);
     setSecondsRemaining(mode === 'timed' ? settings.timedDuration : 0);
     setIsPaused(false);
+    setIsOutOfLives(false);
     setFeedbackState('idle');
     setSelectedOption(null);
     setTypedAnswer('');
@@ -130,7 +145,16 @@ export const GameScreen: React.FC = () => {
 
   // Timed countdown loop
   useEffect(() => {
-    if (mode !== 'timed' || isPaused || feedbackState === 'incorrect' || victorySnapshot) return;
+    if (
+      mode !== 'timed' ||
+      isPaused ||
+      isOutOfLives ||
+      isInterstitialVisible ||
+      feedbackState === 'incorrect' ||
+      victorySnapshot
+    ) {
+      return;
+    }
 
     const timer = setInterval(() => {
       setSecondsRemaining((prev) => {
@@ -157,7 +181,7 @@ export const GameScreen: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [mode, isPaused, feedbackState, victorySnapshot, targetScore]);
+  }, [mode, isPaused, isOutOfLives, isInterstitialVisible, feedbackState, victorySnapshot, targetScore]);
 
   const commitFinishSession = (snapshot?: FinishSnapshot) => {
     if (hasFinishedRef.current) return;
@@ -238,7 +262,15 @@ export const GameScreen: React.FC = () => {
   };
 
   const handleAnswerSubmit = (userAnswer: number | string) => {
-    if (feedbackState !== 'idle' || victorySnapshot || hasFinishedRef.current) return;
+    if (
+      feedbackState !== 'idle' ||
+      victorySnapshot ||
+      isOutOfLives ||
+      isInterstitialVisible ||
+      hasFinishedRef.current
+    ) {
+      return;
+    }
 
     setSelectedOption(userAnswer);
     const spentMs = Date.now() - questionStartTimeRef.current;
@@ -265,8 +297,10 @@ export const GameScreen: React.FC = () => {
 
       const nextScore = scoreRef.current + points;
       const nextCorrect = correctRef.current + 1;
+      const nextConsecutive = consecutiveCorrectRef.current + 1;
       scoreRef.current = nextScore;
       correctRef.current = nextCorrect;
+      consecutiveCorrectRef.current = nextConsecutive;
 
       setScore(nextScore);
       setCorrectCount(nextCorrect);
@@ -309,6 +343,16 @@ export const GameScreen: React.FC = () => {
         return;
       }
 
+      // Trigger interstitial automatically after every 3 consecutive "Bonne réponse"
+      if (nextConsecutive % 3 === 0) {
+        advanceTimerRef.current = window.setTimeout(() => {
+          showInterstitial(() => {
+            advanceNextQuestion();
+          });
+        }, 650);
+        return;
+      }
+
       advanceTimerRef.current = window.setTimeout(() => {
         advanceNextQuestion();
       }, 700);
@@ -316,6 +360,7 @@ export const GameScreen: React.FC = () => {
       sound.playIncorrect();
       setFeedbackState('incorrect');
       setCombo(0);
+      consecutiveCorrectRef.current = 0;
 
       const nextIncorrect = incorrectRef.current + 1;
       incorrectRef.current = nextIncorrect;
@@ -328,13 +373,8 @@ export const GameScreen: React.FC = () => {
         setLives(nextLives);
         if (nextLives <= 0) {
           advanceTimerRef.current = window.setTimeout(() => {
-            commitFinishSession({
-              score: scoreRef.current,
-              correctCount: correctRef.current,
-              incorrectCount: nextIncorrect,
-              isVictory: false,
-            });
-          }, 1500);
+            setIsOutOfLives(true);
+          }, 950);
           return;
         }
       }
@@ -389,6 +429,14 @@ export const GameScreen: React.FC = () => {
     handleAnswerSubmit(typedAnswer.trim());
   };
 
+  const handleClaimFreeLife = () => {
+    sound.playLevelUp();
+    livesRef.current = 1;
+    setLives(1);
+    setIsOutOfLives(false);
+    advanceNextQuestion();
+  };
+
   const handleRestart = () => {
     sound.playClick();
     if (advanceTimerRef.current !== null) clearTimeout(advanceTimerRef.current);
@@ -397,6 +445,7 @@ export const GameScreen: React.FC = () => {
     scoreRef.current = 0;
     correctRef.current = 0;
     incorrectRef.current = 0;
+    consecutiveCorrectRef.current = 0;
     livesRef.current = 3;
     hasFinishedRef.current = false;
     historyRecordsRef.current = [];
@@ -404,6 +453,7 @@ export const GameScreen: React.FC = () => {
     questionStartTimeRef.current = Date.now();
 
     setIsPaused(false);
+    setIsOutOfLives(false);
     setScore(0);
     setCorrectCount(0);
     setIncorrectCount(0);
@@ -426,7 +476,7 @@ export const GameScreen: React.FC = () => {
   const scoreProgressPct = Math.min(100, Math.round((score / targetScore) * 100));
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       {/* Phone container / Game canvas */}
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col min-h-[92vh] max-h-[96vh] overflow-hidden">
         {/* Top Header HUD */}
@@ -847,6 +897,101 @@ export const GameScreen: React.FC = () => {
                   <span>{t('quitGame')}</span>
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+        {/* Out of Lives / Game Over Rescue Modal */}
+        {isOutOfLives && !victorySnapshot && (
+          <div className="absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn">
+            <div className="w-full max-w-xs bg-white dark:bg-slate-800 rounded-3xl p-6 text-center shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-rose-100 dark:bg-rose-950/70 text-rose-500 flex items-center justify-center mx-auto">
+                <Heart className="w-8 h-8" />
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white font-display">
+                  {isFr ? 'Game Over · Plus de vies !' : 'Game Over · Out of Lives!'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {isFr
+                    ? `Score actuel : ${score} pts (${correctCount} bonnes réponses)`
+                    : `Current score: ${score} pts (${correctCount} correct)`}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleClaimFreeLife}
+                  className="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-98 transition-all"
+                >
+                  <span>🎁 +1 Vie Gratuit (Regarder pub)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setIsOutOfLives(false);
+                    commitFinishSession({
+                      score: scoreRef.current,
+                      correctCount: correctRef.current,
+                      incorrectCount: incorrectRef.current,
+                      isVictory: false,
+                    });
+                  }}
+                  className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-transform"
+                >
+                  <span>{isFr ? 'Terminer la partie' : 'Finish Game'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Localhost Interstitial Test Preview Overlay */}
+        {isInterstitialVisible && (
+          <div className="absolute inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-6 animate-fadeIn">
+            <div className="w-full max-w-xs bg-slate-900 text-white rounded-3xl p-6 text-center shadow-2xl border border-slate-700 space-y-4">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <Tv className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Pub Interstitielle Test</span>
+                </span>
+                <span className="font-mono font-bold text-amber-400">
+                  {interstitialCountdown > 0 ? `${interstitialCountdown}s` : 'Prêt'}
+                </span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-800 border border-slate-700 space-y-2">
+                <div className="text-sm font-black font-display">
+                  Interstitiel Test - MATHS PRO
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Déclenchée après 3 bonnes réponses consécutives.
+                </p>
+                <div className="text-[10px] font-mono text-indigo-300 break-all bg-slate-900/80 px-2 py-1 rounded-lg">
+                  {interstitialUnitId}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={interstitialCountdown > 0}
+                onClick={() => {
+                  sound.playClick();
+                  dismissInterstitial();
+                }}
+                className={`w-full py-3 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all ${
+                  interstitialCountdown > 0
+                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg active:scale-95'
+                }`}
+              >
+                {interstitialCountdown > 0
+                  ? `Fermeture dans ${interstitialCountdown}s...`
+                  : 'Fermer et continuer →'}
+              </button>
             </div>
           </div>
         )}

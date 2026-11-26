@@ -20,6 +20,8 @@ import { LegalNoticePage } from './components/LegalNoticePage';
 import { LessonsPage } from './components/LessonsPage';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { AppFooter } from './components/AppFooter';
+import { AdBanner } from './components/AdBanner';
+import { shouldDisplayBottomAdBanner } from './config/adConfig';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -31,7 +33,16 @@ const MainAppContent: React.FC = () => {
     closePlayStore,
     showExitPrompt,
     settings,
+    profile,
+    cookieConsent,
   } = useMathApp();
+
+  const isBottomBannerVisible = shouldDisplayBottomAdBanner({
+    isPremium: profile.isPremium,
+    hasActiveGame: Boolean(activeGame),
+    consentDecided: cookieConsent.decided,
+    consentAds: cookieConsent.ads,
+  });
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col items-center">
@@ -76,7 +87,9 @@ const MainAppContent: React.FC = () => {
           <div
             role="status"
             aria-live="polite"
-            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-800/95 text-white text-xs font-bold shadow-xl border border-slate-700/80 whitespace-nowrap pointer-events-none animate-fadeIn"
+            className={`fixed left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-800/95 text-white text-xs font-bold shadow-xl border border-slate-700/80 whitespace-nowrap pointer-events-none animate-fadeIn ${
+              isBottomBannerVisible ? 'bottom-32' : 'bottom-20'
+            }`}
           >
             {settings.language === 'fr'
               ? "Appuyez une 2ᵉ fois sur Retour pour quitter"
@@ -95,6 +108,9 @@ const MainAppContent: React.FC = () => {
         <PremiumModal />
         <AdModal />
         <PlayStoreModal isOpen={isPlayStoreOpen} onClose={closePlayStore} />
+
+        {/* Fixed Bottom Ad Banner */}
+        <AdBanner />
       </div>
     </div>
   );

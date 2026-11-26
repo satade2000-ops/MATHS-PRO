@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
+import { shouldDisplayBottomAdBanner } from '../config/adConfig';
 
 export const Navbar: React.FC = () => {
   const {
@@ -23,6 +24,8 @@ export const Navbar: React.FC = () => {
     settings,
     activeTab,
     activeInfoPage,
+    activeGame,
+    cookieConsent,
     setActiveTab,
     goHome,
     updateSettings,
@@ -30,6 +33,13 @@ export const Navbar: React.FC = () => {
     openPremium,
     t,
   } = useMathApp();
+
+  const isBottomBannerVisible = shouldDisplayBottomAdBanner({
+    isPremium: profile.isPremium,
+    hasActiveGame: Boolean(activeGame),
+    consentDecided: cookieConsent.decided,
+    consentAds: cookieConsent.ads,
+  });
 
   const handleTabClick = (tab: typeof activeTab) => {
     sound.playClick();
@@ -179,7 +189,11 @@ export const Navbar: React.FC = () => {
       </header>
 
       {/* Fixed Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800/80 shadow-lg">
+      <nav
+        className={`fixed left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800/80 shadow-lg transition-all ${
+          isBottomBannerVisible ? 'bottom-[50px]' : 'bottom-0'
+        }`}
+      >
         <div className="max-w-lg mx-auto grid grid-cols-5 h-16 px-1">
           {/* ACCUEIL */}
           <button

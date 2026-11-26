@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Cookie, ShieldCheck, Sliders, X, Check } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 import { sound } from '../utils/audio';
+import { shouldDisplayBottomAdBanner } from '../config/adConfig';
 
 export const CookieConsentBanner: React.FC = () => {
   const {
@@ -14,10 +15,17 @@ export const CookieConsentBanner: React.FC = () => {
     saveCustomCookieConsent,
     openPrivacy,
     settings,
+    profile,
     activeGame,
   } = useMathApp();
 
   const isFr = settings.language === 'fr';
+  const isBottomBannerVisible = shouldDisplayBottomAdBanner({
+    isPremium: profile.isPremium,
+    hasActiveGame: Boolean(activeGame),
+    consentDecided: cookieConsent.decided,
+    consentAds: cookieConsent.ads,
+  });
   const [adsToggle, setAdsToggle] = useState<boolean>(cookieConsent.ads);
 
   useEffect(() => {
@@ -35,7 +43,9 @@ export const CookieConsentBanner: React.FC = () => {
           role="dialog"
           aria-live="polite"
           aria-label={isFr ? 'Gestion des cookies' : 'Cookie Consent'}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-xl rounded-3xl bg-white/98 dark:bg-slate-900/98 backdrop-blur-lg border border-slate-200 dark:border-slate-700 shadow-2xl p-4 sm:p-5 animate-fadeIn"
+          className={`fixed left-1/2 -translate-x-1/2 z-[55] w-[calc(100%-1.5rem)] max-w-xl rounded-3xl bg-white/98 dark:bg-slate-900/98 backdrop-blur-lg border border-slate-200 dark:border-slate-700 shadow-2xl p-4 sm:p-5 animate-fadeIn ${
+            isBottomBannerVisible ? 'bottom-32' : 'bottom-20'
+          }`}
         >
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
@@ -105,7 +115,7 @@ export const CookieConsentBanner: React.FC = () => {
           role="dialog"
           aria-modal="true"
           aria-label={isFr ? 'Préférences de cookies' : 'Cookie Preferences'}
-          className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-[60] bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4"
         >
           <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-fadeIn space-y-4">
             <div className="flex items-center justify-between">
