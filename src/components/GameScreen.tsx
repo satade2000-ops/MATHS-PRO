@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useMathApp } from '../context/MathContext';
 import { useInterstitial } from '../hooks/useInterstitial';
+import { useRewardedAd } from '../hooks/useRewardedAd';
 import { MathQuestion, QuestionAnswerRecord } from '../types/math';
 import { sound } from '../utils/audio';
 import { generateQuestion } from '../utils/mathGenerator';
@@ -72,6 +73,8 @@ export const GameScreen: React.FC = () => {
   // Victory Celebration Overlay & Out-of-Lives Game Over state
   const [victorySnapshot, setVictorySnapshot] = useState<FinishSnapshot | null>(null);
   const [isOutOfLives, setIsOutOfLives] = useState(false);
+  const [rewardedStatusMsg, setRewardedStatusMsg] = useState<string | null>(null);
+  const [lifeUnlockedBanner, setLifeUnlockedBanner] = useState(false);
 
   // Interstitial Ad hook (every 3 consecutive correct answers)
   const {
@@ -82,6 +85,9 @@ export const GameScreen: React.FC = () => {
     interstitialUnitId,
   } = useInterstitial();
 
+  // Rewarded Ad hook (+1 free life)
+  const { showRewardedAd, isRewardedLoading } = useRewardedAd();
+
   // Live refs to prevent stale closures inside timers
   const scoreRef = useRef(0);
   const correctRef = useRef(0);
@@ -91,6 +97,7 @@ export const GameScreen: React.FC = () => {
   const hasFinishedRef = useRef(false);
   const advanceTimerRef = useRef<number | null>(null);
   const victoryTimerRef = useRef<number | null>(null);
+  const lifeBannerTimerRef = useRef<number | null>(null);
 
   // Timers & Duration
   const totalDuration = mode === 'timed' ? settings.timedDuration : 0;
@@ -107,6 +114,7 @@ export const GameScreen: React.FC = () => {
     return () => {
       if (advanceTimerRef.current !== null) clearTimeout(advanceTimerRef.current);
       if (victoryTimerRef.current !== null) clearTimeout(victoryTimerRef.current);
+      if (lifeBannerTimerRef.current !== null) clearTimeout(lifeBannerTimerRef.current);
     };
   }, []);
 
@@ -114,6 +122,7 @@ export const GameScreen: React.FC = () => {
   useEffect(() => {
     if (advanceTimerRef.current !== null) clearTimeout(advanceTimerRef.current);
     if (victoryTimerRef.current !== null) clearTimeout(victoryTimerRef.current);
+    if (lifeBannerTimerRef.current !== null) clearTimeout(lifeBannerTimerRef.current);
 
     scoreRef.current = 0;
     correctRef.current = 0;
@@ -134,6 +143,8 @@ export const GameScreen: React.FC = () => {
     setSecondsRemaining(mode === 'timed' ? settings.timedDuration : 0);
     setIsPaused(false);
     setIsOutOfLives(false);
+    setRewardedStatusMsg(null);
+    setLifeUnlockedBanner(false);
     setFeedbackState('idle');
     setSelectedOption(null);
     setTypedAnswer('');
@@ -429,18 +440,49 @@ export const GameScreen: React.FC = () => {
     handleAnswerSubmit(typedAnswer.trim());
   };
 
-  const handleClaimFreeLife = () => {
+  const grantExtraLife = () => {
     sound.playLevelUp();
     livesRef.current = 1;
     setLives(1);
+    setRewardedStatusMsg(null);
     setIsOutOfLives(false);
+    setLifeUnlockedBanner(true);
+    if (lifeBannerTimerRef.current !== null) clearTimeout(lifeBannerTimerRef.current);
+    lifeBannerTimerRef.current = window.setTimeout(() => {
+      setLifeUnlockedBanner(false);
+    }, 3500);
     advanceNextQuestion();
+  };
+
+  const handleClaimFreeLife = () => {
+    sound.playClick();
+    setRewardedStatusMsg(null);
+    showRewardedAd({
+      onRewarded: () => {
+        grantExtraLife();
+      },
+      onDismissed: () => {
+        setRewardedStatusMsg(
+          isFr
+            ? 'Publicité fermée avant la fin. Regarde la pub jusqu’au bout pour débloquer +1 vie.'
+            : 'Ad closed before completion. Watch until the end to unlock +1 life.'
+        );
+      },
+      onUnavailable: () => {
+        setRewardedStatusMsg(
+          isFr
+            ? 'Publicité récompensée indisponible pour le moment sur cette session.'
+            : 'Rewarded ad is currently unavailable for this session.'
+        );
+      },
+    });
   };
 
   const handleRestart = () => {
     sound.playClick();
     if (advanceTimerRef.current !== null) clearTimeout(advanceTimerRef.current);
     if (victoryTimerRef.current !== null) clearTimeout(victoryTimerRef.current);
+    if (lifeBannerTimerRef.current !== null) clearTimeout(lifeBannerTimerRef.current);
 
     scoreRef.current = 0;
     correctRef.current = 0;
@@ -454,6 +496,8 @@ export const GameScreen: React.FC = () => {
 
     setIsPaused(false);
     setIsOutOfLives(false);
+    setRewardedStatusMsg(null);
+    setLifeUnlockedBanner(false);
     setScore(0);
     setCorrectCount(0);
     setIncorrectCount(0);
@@ -588,6 +632,18 @@ export const GameScreen: React.FC = () => {
             />
           )}
         </div>
+
+        {/* +1 Life Unlocked Celebration Banner */}
+        {lifeUnlockedBanner && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-sm shrink-0 animate-fadeIn"
+          >
+            <Heart className="w-3.5 h-3.5 fill-white" />
+            <span>Bravo ! +1 vie débloquée !</span>
+          </div>
+        )}
 
         {/* Combo Banner */}
         {combo >= 2 && (
@@ -919,13 +975,30 @@ export const GameScreen: React.FC = () => {
                 </p>
               </div>
 
+              {rewardedStatusMsg && (
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-semibold text-amber-800 dark:text-amber-200 leading-relaxed">
+                  {rewardedStatusMsg}
+                </div>
+              )}
+
               <div className="flex flex-col gap-2.5 pt-1">
                 <button
                   type="button"
+                  disabled={isRewardedLoading}
                   onClick={handleClaimFreeLife}
-                  className="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-98 transition-all"
+                  className={`w-full py-3.5 px-4 rounded-xl text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg transition-all ${
+                    isRewardedLoading
+                      ? 'bg-emerald-400 cursor-wait opacity-80'
+                      : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25 active:scale-98'
+                  }`}
                 >
-                  <span>🎁 +1 Vie Gratuit (Regarder pub)</span>
+                  <span>
+                    {isRewardedLoading
+                      ? isFr
+                        ? 'Chargement de la pub...'
+                        : 'Loading ad...'
+                      : '🎁 +1 Vie Gratuit (Regarder pub)'}
+                  </span>
                 </button>
 
                 <button

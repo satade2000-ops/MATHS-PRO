@@ -6,6 +6,8 @@ export const ADMOB_IDS = {
   bannerTest: 'ca-app-pub-3940256099942544/6300978111',
   interstitialReal: 'ca-app-pub-4256744845246337/4687961602',
   interstitialTest: 'ca-app-pub-3940256099942544/1033173712',
+  rewardedReal: 'ca-app-pub-4256744845246337/1383588527',
+  rewardedTest: 'ca-app-pub-3940256099942544/5224354917',
 } as const;
 
 export interface NativeAdMobPlugin {
@@ -15,6 +17,8 @@ export interface NativeAdMobPlugin {
   removeBanner?: () => Promise<void>;
   prepareInterstitial?: (options: Record<string, unknown>) => Promise<void>;
   showInterstitial?: () => Promise<void>;
+  prepareRewardVideoAd?: (options: Record<string, unknown>) => Promise<void>;
+  showRewardVideoAd?: () => Promise<Record<string, unknown> | boolean | void>;
 }
 
 export const isLocalhostEnvironment = (): boolean => {
